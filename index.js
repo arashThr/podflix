@@ -1,4 +1,4 @@
-const { launchBot } = require('./clientBot/bot')
+const { launchBot } = require('./clientBot/clientBot')
 const { startListen } = require('./clientBot/paymentListener')
 
 console.log('Launching bot ...')
