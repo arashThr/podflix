@@ -15,7 +15,7 @@ let menuKeyboard = Markup.inlineKeyboard([
     Markup.callbackButton('Show Files', 'show-files'),
     Markup.callbackButton('Add File', 'add-file')]).extra()
 
-function getBackButton(keys = []) {
+function goHomeButton(keys = []) {
     return Markup.inlineKeyboard(keys.concat([
         Markup.callbackButton('Back', 'dashboard-main'),
       ])).extra()
@@ -28,14 +28,14 @@ dashboardScene.enter(ctx => {
 
 dashboardScene.action('show-files', ctx => {
     if (uploadedFiles.size === 0)
-        return ctx.editMessageText('No episode uploaded', getBackButton())
+        return ctx.editMessageText('No episode uploaded', goHomeButton())
     
     let episodes = ''
     for (let [id, details] of uploadedFiles) {
         episodes += `/${id} : ${details.name}\n`
     }
     
-    ctx.editMessageText(episodes, getBackButton())
+    ctx.editMessageText(episodes, goHomeButton())
 })
 
 const epNameRegex = new RegExp(`^\/(ep_[a-z0-9]{${EP_NAME_LENGTH}})$`)
@@ -44,7 +44,7 @@ dashboardScene.hears(epNameRegex, ctx => {
     let fileInfo = uploadedFiles.get(fileId)
 
     ctx.session.fileId = fileId
-    ctx.reply(`name: ${fileInfo.name}`, getBackButton([
+    ctx.reply(`name: ${fileInfo.name}`, goHomeButton([
         Markup.callbackButton('Remove', 'remove-file')
     ]))
 })
@@ -52,22 +52,20 @@ dashboardScene.hears(epNameRegex, ctx => {
 dashboardScene.action('remove-file', ctx => {
     let success = uploadedFiles.delete(ctx.session.fileId)
     if (success)
-        ctx.editMessageText('File removed from collection', getBackButton([
+        ctx.editMessageText('File removed from collection', goHomeButton([
             Markup.callbackButton('Show files', 'show-files')
         ]))
     else
-        ctx.editMessageText('Removal failed', getBackButton())
+        ctx.editMessageText('Removal failed', goHomeButton())
 })
 
 dashboardScene.action('add-file', ctx => {
     ctx.session.dashboardState = dashboardState.SENDING_FILE
-    ctx.editMessageText('Send file or press back', getBackButton())
+    ctx.editMessageText('Send file or press back', goHomeButton())
 })
 
 dashboardScene.action('dashboard-main', ctx => {
-    let replyFunc = ctx.session.dashboardState === dashboardState.SENDING_FILE
-        ? ctx.editMessageText : ctx.reply
-    replyFunc('Select', menuKeyboard)
+    ctx.editMessageText('Select', menuKeyboard)
     ctx.session.dashboardState = dashboardState.MAIN_MENU
 })
 dashboardScene.on('message', ctx => {
@@ -88,7 +86,7 @@ dashboardScene.on('message', ctx => {
     }
     let randomString = Math.random().toString(36).substring(2, 2 + EP_NAME_LENGTH)
     uploadedFiles.set('ep_' + randomString, fileInfo)
-    ctx.reply('Send another or hit back', getBackButton())
+    ctx.reply('Send another or hit back', goHomeButton())
 })
 
 module.exports = dashboardScene
