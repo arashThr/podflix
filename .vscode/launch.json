@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}/adminBot/adminBot.js",
             "envFile": "${workspaceFolder}/.env",
             "env": {
-            }
+            },
+            "outputCapture": "std"
         },   
     ]
 }

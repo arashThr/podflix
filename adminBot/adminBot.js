@@ -1,7 +1,8 @@
 const Telegraf = require('telegraf')
 const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
-const { enter, leave } = Stage
+const { enter } = Stage
+const logger = require('../logger')
 
 const loginScene = require('./loginScene')
 const dashboardScene = require('./dashboard')
@@ -17,4 +18,4 @@ bot.command('login', enter('login'))
 bot.command('dash', enter('dashboard'))
 bot.on('message', (ctx) => ctx.reply('Try /echo or /greeter'))
 bot.launch()
-console.log('Admin bot started')
+logger.info('Admin bot started')
