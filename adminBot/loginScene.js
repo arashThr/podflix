@@ -7,10 +7,9 @@ loginScene.enter((ctx) => {
     ctx.session.loginAttempt = 1
     ctx.reply('Welcome. Enter pass')
 })
-loginScene.leave((ctx) => {
+loginScene.leave(ctx => {
     if (adminsId.includes(ctx.from.id)) {
         ctx.reply('Going to dashboard')
-        // enter('dashboard')
     }
     else
         ctx.reply('Go away')
@@ -26,7 +25,7 @@ loginScene.on('text', (ctx) => {
         ctx.reply('Correct')
         ctx.session.loginAttempt = 0
         adminsId.push(ctx.from.id)
-        ctx.scene.leave()
+        ctx.scene.enter('dashboard')
     }
     else
         ctx.reply('Wrong')
