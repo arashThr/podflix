@@ -3,14 +3,14 @@ const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
 
 const Payments = require('./payment')
+const User = require('./user')
 
 const selectBuyStep = ctx => {
     ctx.reply(
         'Episode descriptions',
         Markup.inlineKeyboard([
-            Markup.urlButton('Visit site', 'https://google.com'),
             Markup.callbackButton('Buy', 'buy'),
-            Markup.callbackButton('Back', 'home')
+            Markup.urlButton('Visit site', 'https://google.com')
         ]).extra()
     )
     return ctx.wizard.next()
@@ -26,10 +26,6 @@ paymentDecisonStep.action('buy', ctx => {
         ]).extra()
     )
     return ctx.wizard.next()
-})
-paymentDecisonStep.action('home', ctx => {
-    ctx.editMessageText('Leaving the buy. Going back to home.')
-    return ctx.scene.leave()
 })
 
 const sendPaymentLinkStep = new Composer()
@@ -51,11 +47,12 @@ sendPaymentLinkStep.action('iran', async ctx => {
     try {
         console.log('Resolved: ' + (await paymentPromise))
         ctx.editMessageText('Success')
+        User.addNewUser(ctx.from)
+        ctx.scene.leave()
     } catch (e) {
         console.log('Payment failed ... ', e)
-        ctx.editMessageText('Failed!')
-    } finally {
-        ctx.scene.leave()
+        ctx.editMessageText('Failed! - Please try again or contact us')
+        ctx.scene.enter('payment-wizard')
     }
 })
 sendPaymentLinkStep.action('tg-payment', ctx => {
