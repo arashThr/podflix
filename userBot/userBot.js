@@ -86,51 +86,9 @@ const paymentWizard = new WizardScene(
   }
 )
 
-
-
-const stepHandler = new Composer()
-stepHandler.action('next', (ctx) => {
-  ctx.reply('Step 2. Via inline button')
-  return ctx.wizard.next()
-})
-stepHandler.command('next', (ctx) => {
-  ctx.reply('Step 2. Via command')
-  return ctx.wizard.next()
-})
-stepHandler.use((ctx) => ctx.replyWithMarkdown('Press `Next` button or type /next'))
-
-const superWizard = new WizardScene('super-wizard',
-  (ctx) => {
-    ctx.reply('Step 1', Markup.inlineKeyboard([
-      Markup.urlButton('❤️', 'http://telegraf.js.org'),
-      Markup.callbackButton('➡️ Next', 'next')
-    ]).extra())
-    ctx.state.name = 'John'
-    ctx.session.counter = 1
-    return ctx.wizard.next()
-  },
-  stepHandler,
-  (ctx) => {
-    ctx.reply('Step 3: ' + ctx.state.name)
-    ctx.session.counter += 1
-    return ctx.wizard.next()
-  },
-  (ctx) => {
-    ctx.reply('Step 4: ' + ctx.session.counter)
-    return ctx.wizard.next()
-  },
-  (ctx) => {
-    ctx.reply('Done')
-    return ctx.scene.leave()
-  }
-)
-
-
-
-
 exports.launchBot = function launchBot() {
   const bot = new Telegraf(process.env.BOT_TOKEN)
-  const stage = new Stage([paymentWizard, superWizard], { default: 'super-wizard' })
+  const stage = new Stage([paymentWizard], { default: 'payment-wizard' })
   bot.use(session({ /* ttl: 1000 */ }))
   bot.use(stage.middleware())
   bot.launch()

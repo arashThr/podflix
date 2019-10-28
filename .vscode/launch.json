@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/adminBot/adminBot.js",
+            "program": "${workspaceFolder}/userBot/userBot.js",
             "envFile": "${workspaceFolder}/.env",
             "env": {
             },
