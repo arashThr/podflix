@@ -1,9 +1,11 @@
 const Scene = require('telegraf/scenes/base')
+const logger = require('../logger')
 
 let adminsId = ['37037901']
 
 const loginScene = new Scene('login')
 loginScene.enter((ctx) => {
+    logger.info('User loggin in')
     ctx.session.loginAttempt = 1
     ctx.reply('Welcome. Enter pass')
 })

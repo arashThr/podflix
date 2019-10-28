@@ -1,7 +1,7 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
-const { db, FILES_COLLECTION } = require('./adminDb')
+const { db, FILES_COLLECTION } = require('../db/adminDb')
   
 const dashboardScene = new Scene('dashboard')
 const dashboardState = {

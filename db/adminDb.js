@@ -1,7 +1,7 @@
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 
-const adapter = new FileSync('db/adminDb.json')
+const adapter = new FileSync('data/ownersData.json')
 const db = low(adapter)
 
 const FILES_COLLECTION = 'files', ADMIN_COLLECTION = 'admins'
