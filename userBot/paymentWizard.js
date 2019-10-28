@@ -10,7 +10,7 @@ const selectBuyStep = ctx => {
         Markup.inlineKeyboard([
             Markup.urlButton('Visit site', 'https://google.com'),
             Markup.callbackButton('Buy', 'buy'),
-            Markup.callbackButton('Back', 'home'),
+            Markup.callbackButton('Back', 'home')
         ]).extra()
     )
     return ctx.wizard.next()
@@ -22,7 +22,7 @@ paymentDecisonStep.action('buy', ctx => {
         'Are you in Iran?',
         Markup.inlineKeyboard([
             Markup.callbackButton('Yes', 'iran'),
-            Markup.callbackButton('No', 'tg-payment'),
+            Markup.callbackButton('No', 'tg-payment')
         ]).extra()
     )
     return ctx.wizard.next()
@@ -40,11 +40,11 @@ sendPaymentLinkStep.action('iran', async ctx => {
             Markup.urlButton(
                 'Pay',
                 `${process.env.PAYMENT_SERVER_URL}/irpay/${ctx.chat.id}`
-            ),
+            )
         ]).extra()
     )
 
-    let paymentPromise = new Promise((resolve, reject) => {
+    const paymentPromise = new Promise((resolve, reject) => {
         Payments.addPay(ctx.chat.id, { resolve, reject })
     })
 
@@ -65,12 +65,12 @@ sendPaymentLinkStep.action('tg-payment', ctx => {
             Markup.urlButton(
                 'Telegram Payment',
                 `${process.env.PAYMENT_SERVER_URL}/tgpay/${ctx.chat.id}`
-            ),
+            )
         ]).extra()
     )
 })
 
-let waitForPaymentStep = new Composer()
+const waitForPaymentStep = new Composer()
 waitForPaymentStep.use(ctx => {
     console.log('AFTER')
 
