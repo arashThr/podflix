@@ -1,9 +1,8 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
-
-let uploadedFiles = new Map()
-
+const { db, FILES_COLLECTION } = require('./adminDb')
+  
 const dashboardScene = new Scene('dashboard')
 const dashboardState = {
     SENDING_FILE: 'sending',
@@ -27,12 +26,13 @@ dashboardScene.enter(ctx => {
 })
 
 dashboardScene.action('show-files', ctx => {
-    if (uploadedFiles.size === 0)
+    let files = db.get(FILES_COLLECTION).value()
+    if (files.length === 0)
         return ctx.editMessageText('No episode uploaded', goHomeButton())
     
     let episodes = ''
-    for (let [id, details] of uploadedFiles) {
-        episodes += `/${id} : ${details.name}\n`
+    for (let file of files) {
+        episodes += `/${file.epKey} : ${file.name}\n`
     }
     
     ctx.editMessageText(episodes, goHomeButton())
@@ -40,18 +40,18 @@ dashboardScene.action('show-files', ctx => {
 
 const epNameRegex = new RegExp(`^\/(ep_[a-z0-9]{${EP_NAME_LENGTH}})$`)
 dashboardScene.hears(epNameRegex, ctx => {
-    let fileId = ctx.match[1]
-    let fileInfo = uploadedFiles.get(fileId)
+    let epKey = ctx.match[1]
+    ctx.session.epKey = epKey
 
-    ctx.session.fileId = fileId
+    let fileInfo = db.get(FILES_COLLECTION).find({ epKey }).value()
     ctx.reply(`name: ${fileInfo.name}`, goHomeButton([
         Markup.callbackButton('Remove', 'remove-file')
     ]))
 })
 
 dashboardScene.action('remove-file', ctx => {
-    let success = uploadedFiles.delete(ctx.session.fileId)
-    if (success)
+    let result = db.get(FILES_COLLECTION).remove({epKey: ctx.session.epKey}).write()
+    if (result.length === 1)
         ctx.editMessageText('File removed from collection', goHomeButton([
             Markup.callbackButton('Show files', 'show-files')
         ]))
@@ -75,17 +75,18 @@ dashboardScene.on('message', ctx => {
     let doc = ctx.message.document
     if (!doc) {
         logger.warn('Not a FILE!!!')
-        ctx.reply('This is not a file')
-        return ctx.scene.enter()
+        return ctx.reply('This is not a file. Try again or hit back', goHomeButton())
     }
-    // if (doc.mime_type)
+    // Todo: check doc.mime_type
+    let epKey = 'ep_' + Math.random().toString(36).substring(2, 2 + EP_NAME_LENGTH)
+
     let fileInfo = {
-        id: doc.file_id,
+        epKey,
+        fileId: doc.file_id,
         name: doc.file_name,
         size: doc.file_size
     }
-    let randomString = Math.random().toString(36).substring(2, 2 + EP_NAME_LENGTH)
-    uploadedFiles.set('ep_' + randomString, fileInfo)
+    db.get(FILES_COLLECTION).push(fileInfo).write()
     ctx.reply('Send another or hit back', goHomeButton())
 })
 
