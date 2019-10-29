@@ -1,4 +1,4 @@
-const { userDb, USERS_COLLECTION } = require('../db/userDb')
+const db = require('../db')
 
 module.exports = class User {
     static mapTgUserToUser(tgUser) {
@@ -11,16 +11,16 @@ module.exports = class User {
     }
 
     static findUser(tgUser) {
-        return userDb
-            .get(USERS_COLLECTION)
+        return db.userDb
+            .get(db.USERS_COLLECTION)
             .find({ chatId: tgUser.id })
             .value()
     }
 
     static addNewUser(tgUser) {
         const user = User.mapTgUserToUser(tgUser)
-        return userDb
-            .get(USERS_COLLECTION)
+        return db.userDb
+            .get(db.USERS_COLLECTION)
             .push(user)
             .write()
     }

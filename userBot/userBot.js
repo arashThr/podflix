@@ -3,12 +3,22 @@ const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
 const { enter } = Stage
 
+// Admin
+const loginScene = require('./loginScene')
+const dashboardScene = require('./dashboard')
+
+// User
 const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
 const User = require('./user')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.use(session())
+
+const stage = new Stage([loginScene, dashboardScene, paymentWizard, userMenuScene])
+bot.use(stage.middleware())
+bot.command('login', enter('login'))
+bot.command('dash', enter('dashboard'))
 
 bot.start(ctx => {
     const tgUser = ctx.from
@@ -18,15 +28,12 @@ bot.start(ctx => {
 
     if (user) {
         ctx.reply('Welcome back')
-        enter('user-menu-scene')
+        ctx.scene.enter('user-menu-scene')
     } else {
         ctx.reply('You are unknown')
-        enter('payment-wizard')
+        ctx.scene.enter('payment-wizard')
     }
 })
-
-const stage = new Stage([paymentWizard, userMenuScene])
-bot.use(stage.middleware())
 
 exports.launchBot = function launchBot() {
     bot.launch()

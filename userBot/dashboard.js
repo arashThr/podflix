@@ -1,7 +1,7 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
-const { db, FILES_COLLECTION } = require('../db/adminDb')
+const db = require('../db')
 const Commons = require('../common')
 
 const dashboardScene = new Scene('dashboard')
@@ -12,7 +12,8 @@ const dashboardState = {
 
 const menuKeyboard = Markup.inlineKeyboard([
     Markup.callbackButton('Show Files', 'show-files'),
-    Markup.callbackButton('Add File', 'add-file')
+    Markup.callbackButton('Add File', 'add-file'),
+    Markup.callbackButton('Exit', 'exit-dashboard')
 ]).extra()
 
 function goHomeButton(keys = []) {
@@ -26,8 +27,13 @@ dashboardScene.enter(ctx => {
     ctx.reply('Select', menuKeyboard)
 })
 
+dashboardScene.action('exit-dashboard', ctx => {
+    ctx.editMessageText('Good byy admin. Press /start or /login')
+    ctx.scene.leave()
+})
+
 dashboardScene.action('show-files', ctx => {
-    const files = db.get(FILES_COLLECTION).value()
+    const files = db.adminDb.get(db.FILES_COLLECTION).value()
     if (files.length === 0) {
         return ctx.editMessageText('No episode uploaded', goHomeButton())
     }
@@ -44,8 +50,8 @@ dashboardScene.hears(Commons.epNameRegex, ctx => {
     const epKey = ctx.match[1]
     ctx.session.epKey = epKey
 
-    const fileInfo = db
-        .get(FILES_COLLECTION)
+    const fileInfo = db.adminDb
+        .get(db.FILES_COLLECTION)
         .find({ epKey })
         .value()
     ctx.reply(
@@ -55,8 +61,8 @@ dashboardScene.hears(Commons.epNameRegex, ctx => {
 })
 
 dashboardScene.action('remove-file', ctx => {
-    const result = db
-        .get(FILES_COLLECTION)
+    const result = db.adminDb
+        .get(db.FILES_COLLECTION)
         .remove({ epKey: ctx.session.epKey })
         .write()
     if (result.length === 1) {
@@ -101,7 +107,8 @@ dashboardScene.on('message', ctx => {
         name: doc.file_name,
         size: doc.file_size
     }
-    db.get(FILES_COLLECTION)
+    db.adminDb
+        .get(db.FILES_COLLECTION)
         .push(fileInfo)
         .write()
     ctx.reply('Send another or hit back', goHomeButton())
