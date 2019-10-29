@@ -48,7 +48,7 @@ sendPaymentLinkStep.action('iran', async ctx => {
         console.log('Resolved: ' + (await paymentPromise))
         ctx.editMessageText('Success')
         User.addNewUser(ctx.from)
-        ctx.scene.leave()
+        ctx.scene.enter('user-menu-scene')
     } catch (e) {
         console.log('Payment failed ... ', e)
         ctx.editMessageText('Failed! - Please try again or contact us')
