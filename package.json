@@ -12,10 +12,12 @@
   "dependencies": {
     "express": "^4.17.1",
     "lowdb": "^1.0.0",
+    "node-fetch": "^2.6.0",
     "telegraf": "^3.32.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "eslint": "^6.6.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.18.2",

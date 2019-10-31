@@ -1,6 +1,7 @@
 const Markup = require('telegraf/markup')
 const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
+const { getPaymentLink } = '../payment/payping'
 
 const Payments = require('./payment')
 const User = require('./user')
@@ -30,13 +31,11 @@ paymentDecisonStep.action('buy', ctx => {
 
 const sendPaymentLinkStep = new Composer()
 sendPaymentLinkStep.action('iran', async ctx => {
+    const link = await getPaymentLink(100)
     ctx.editMessageText(
         'Pay from Iran',
         Markup.inlineKeyboard([
-            Markup.urlButton(
-                'Pay',
-                `${process.env.PAYMENT_SERVER_URL}/irpay/${ctx.chat.id}`
-            )
+            Markup.urlButton('Pay', link)
         ]).extra()
     )
 
@@ -59,10 +58,7 @@ sendPaymentLinkStep.action('tg-payment', ctx => {
     ctx.editMessageText(
         'Pay with telegram payment. Open this URL:',
         Markup.inlineKeyboard([
-            Markup.urlButton(
-                'Telegram Payment',
-                `${process.env.PAYMENT_SERVER_URL}/tgpay/${ctx.chat.id}`
-            )
+            Markup.urlButton('Telegram Payment', 'http://google.com')
         ]).extra()
     )
 })
