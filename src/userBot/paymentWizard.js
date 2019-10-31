@@ -3,7 +3,7 @@ const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
 const { getPaymentLink } = '../payment/payping'
 
-const Payments = require('./payment')
+const Payments = require('../payment/payment')
 const User = require('./user')
 
 const selectBuyStep = ctx => {

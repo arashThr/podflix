@@ -20,14 +20,17 @@ app.use(express.json())
 app.post('/v1/pay', (req, res) => {
     console.log('New request', req.url)
     console.log('Sendgin to code ...')
-    res.send(JSON.stringify({
-        code: '8c649a'
-    }))
+    res.send(
+        JSON.stringify({
+            code: '8c649a'
+        })
+    )
 })
 
 app.post('/v1/pay/verify', (req, res) => {
     console.log('Verfication called for amount: ', req.body)
     res.sendStatus(200)
+    process.exit(0)
 })
 
 async function simulatePaymentProcess() {

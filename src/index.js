@@ -1,5 +1,5 @@
 const { launchBot } = require('./userBot/userBot')
-const { startListen } = require('./userBot/paymentListener')
+const { startListen } = require('./payment/paymentListener')
 
 console.log('Launching bot ...')
 launchBot()

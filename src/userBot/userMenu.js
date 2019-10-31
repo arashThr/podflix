@@ -9,7 +9,7 @@ const userMenuScene = new Scene('user-menu-scene')
 const mainMenuButtons = Markup.inlineKeyboard([
     Markup.callbackButton('Show All', 'all-episodes'),
     Markup.callbackButton('Get next', 'next-episode'),
-    Markup.callbackButton('Exit', 'exit-user-bot'),
+    Markup.callbackButton('Exit', 'exit-user-bot')
 ]).extra()
 
 const enterMenu = ctx => ctx.reply('Select', mainMenuButtons)

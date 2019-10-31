@@ -5,7 +5,8 @@ const url = require('url')
 
 const app = express()
 const port = 3000
-const paypingReturnPath = new url.URL(process.env.PAYMENT_RETURN_ADDRESS).pathname
+const paypingReturnPath = new url.URL(process.env.PAYMENT_RETURN_ADDRESS)
+    .pathname
 
 function handleRedirect(res, chatId) {
     const targetUrl = `${process.env.PAYMENT_RETURN_URL}/accepted/${chatId}`
@@ -60,9 +61,11 @@ app.get(paypingReturnPath, async (req, res) => {
         amount: 100,
         refId: refId
     })
-    const resp = await fetch(`${process.env.PAYPING_SERVER}/v1/pay/verify`,
-        { method: 'POST', body: verifyBody, headers: { 'Content-Type': 'application/json' } }
-    )
+    const resp = await fetch(`${process.env.PAYPING_SERVER}/v1/pay/verify`, {
+        method: 'POST',
+        body: verifyBody,
+        headers: { 'Content-Type': 'application/json' }
+    })
     if (resp.status === 200) {
         console.log('Payment verifed')
     } else {

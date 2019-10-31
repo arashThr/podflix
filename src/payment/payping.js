@@ -27,9 +27,10 @@ async function verifyPayment(amount, refId) {
         amount,
         refId: refId
     })
-    const resp = await fetch(process.env.PAYPING_SERVER + '/v1/pay/verify',
-        { method: 'POST', body: verifyBody }
-    )
+    const resp = await fetch(process.env.PAYPING_SERVER + '/v1/pay/verify', {
+        method: 'POST',
+        body: verifyBody
+    })
 
     if (resp.status === 200) {
         console.log('Payment verifed')
