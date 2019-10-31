@@ -1,4 +1,5 @@
 const fetch = require('node-fetch')
+const logger = require('../logger')
 
 async function getPaymentCode(amount) {
     const paymentBody = JSON.stringify({
@@ -10,16 +11,29 @@ async function getPaymentCode(amount) {
         clientRefId: 'CRFID'
     })
 
-    console.log('Sending request to get to code ...')
     const paymentUrl = process.env.PAYPING_SERVER + '/v1/pay'
-    const resp = await fetch(paymentUrl, { method: 'POST', body: paymentBody })
+    logger.debug('Sending request to get to code ...', paymentUrl)
+    const resp = await fetch(paymentUrl, {
+        method: 'POST',
+        body: paymentBody,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + process.env.PAYPING_TOKEN
+        }
+    })
+    if (resp.status !== 200) {
+        logger.error('Getting payment code failed: ', resp.statusText)
+        return null
+    }
     const jsonResp = await resp.json()
+    logger.debug('Payment code reponse is: ', jsonResp)
     return jsonResp.code
 }
 
 async function getPaymentLink(amount) {
     const code = await getPaymentCode(amount)
-    return `${process.env.PAYPING_SERVER}/v1/pay/gotoipg/${code}`
+    if (code) return `${process.env.PAYPING_SERVER}/v1/pay/gotoipg/${code}`
+    return null
 }
 
 async function verifyPayment(amount, refId) {
@@ -33,10 +47,10 @@ async function verifyPayment(amount, refId) {
     })
 
     if (resp.status === 200) {
-        console.log('Payment verifed')
+        logger.debug('Payment verifed', verifyBody)
         return true
     } else {
-        console.error('Verification failed')
+        logger.error('Verification failed', verifyBody)
         return false
     }
 }

@@ -1,7 +1,7 @@
 const Markup = require('telegraf/markup')
 const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
-const { getPaymentLink } = '../payment/payping'
+const { getPaymentLink } = require('../payment/payping')
 
 const Payments = require('../payment/payment')
 const User = require('./user')
@@ -32,6 +32,12 @@ paymentDecisonStep.action('buy', ctx => {
 const sendPaymentLinkStep = new Composer()
 sendPaymentLinkStep.action('iran', async ctx => {
     const link = await getPaymentLink(100)
+    if (!link) {
+        ctx.editMessageText('Getting payment link failed. Try again later - /start')
+        ctx.scene.leave()
+        return
+    }
+    console.log('LINK: ', link)
     ctx.editMessageText(
         'Pay from Iran',
         Markup.inlineKeyboard([
