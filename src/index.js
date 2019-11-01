@@ -1,8 +1,19 @@
 const { launchBot } = require('./userBot/userBot')
 const { startListen } = require('./payment/paymentListener')
+const { initDb } = require('./db')
 
-console.log('Launching bot ...')
-launchBot()
+async function start() {
+    const connected = await initDb()
+    if (!connected) {
+        console.error('DB connection failed')
+        process.exit(1)
+    }
 
-console.log('Luanching server ...')
-startListen()
+    console.log('Launching bot ...')
+    launchBot()
+
+    console.log('Luanching server ...')
+    startListen()
+}
+
+start()

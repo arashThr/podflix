@@ -6,7 +6,7 @@ const { getPaymentLink } = require('../payment/payping')
 const configs = require('../configs')
 
 const logger = require('../logger')
-const User = require('./user')
+const { usersCollection } = require('../db')
 
 const sub = redis.createClient(configs.redisUrl)
 sub.on('message', (channel, message) => {
@@ -79,8 +79,18 @@ sendPaymentLinkStep.action('iran', async ctx => {
     try {
         logger.debug('Payment resolved: ' + (await paymentPromise))
         ctx.editMessageText('Success')
-        User.addNewUser(ctx.from)
-        ctx.scene.enter('user-menu-scene')
+        const tgUser = ctx.from
+        const { result } = await usersCollection().insertOne({
+            chatId: tgUser.id,
+            username: tgUser.username,
+            firstName: tgUser.first_name,
+            lastName: tgUser.last_name
+        })
+        if (result.ok) ctx.scene.enter('user-menu-scene')
+        else {
+            ctx.reply('User add failed')
+            ctx.scene.leave()
+        }
     } catch (e) {
         logger.error('Payment failed ... ', e)
         ctx.editMessageText('Failed! - Please try again or contact us')

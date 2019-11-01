@@ -1,7 +1,7 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 
-const db = require('../db')
+const { filesCollection } = require('../db')
 const Commons = require('../common')
 
 const userMenuScene = new Scene('user-menu-scene')
@@ -15,20 +15,23 @@ const mainMenuButtons = Markup.inlineKeyboard([
 const enterMenu = ctx => ctx.reply('Select', mainMenuButtons)
 userMenuScene.enter(enterMenu)
 userMenuScene.action('user-menu-reply', enterMenu)
-userMenuScene.action('user-menu', ctx => ctx.editMessageText('Select', mainMenuButtons))
+userMenuScene.action('user-menu', ctx =>
+    ctx.editMessageText('Select', mainMenuButtons)
+)
 
-userMenuScene.action('all-episodes', ctx => {
-    const episodes = db.adminDb
-        .get(db.FILES_COLLECTION)
-        .reverse()
-        .value()
+userMenuScene.action('all-episodes', async ctx => {
+    const episodes = await filesCollection()
+        .find()
+        .toArray()
     const text = episodes
         .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.name}\n\n`, '')
         .trim()
-    ctx.editMessageText('Here are the episodes\n' + text,
+    ctx.editMessageText(
+        'Here are the episodes\n' + text,
         Markup.inlineKeyboard([
             Markup.callbackButton('Get home', 'user-menu')
-        ]).extra())
+        ]).extra()
+    )
 })
 
 userMenuScene.action('exit-user-bot', ctx => {
@@ -36,18 +39,18 @@ userMenuScene.action('exit-user-bot', ctx => {
     ctx.scene.leave()
 })
 
-userMenuScene.hears(Commons.epNameRegex, ctx => {
+userMenuScene.hears(Commons.epNameRegex, async ctx => {
     const epKey = ctx.match[1]
     ctx.session.epKey = epKey
 
-    const fileInfo = db.adminDb
-        .get(db.FILES_COLLECTION)
-        .find({ epKey })
-        .value()
+    const fileInfo = await filesCollection().findOne({ epKey })
     try {
-        ctx.replyWithDocument(fileInfo.fileId, Markup.inlineKeyboard([
-            Markup.callbackButton('Get home', 'user-menu-reply')
-        ]).extra())
+        ctx.replyWithDocument(
+            fileInfo.fileId,
+            Markup.inlineKeyboard([
+                Markup.callbackButton('Get home', 'user-menu-reply')
+            ]).extra()
+        )
     } catch (e) {
         ctx.reply('Error occured')
         console.error(e)

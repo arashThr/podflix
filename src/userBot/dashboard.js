@@ -1,7 +1,7 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
-const db = require('../db')
+const { filesCollection } = require('../db')
 const Commons = require('../common')
 
 const dashboardScene = new Scene('dashboard')
@@ -32,8 +32,10 @@ dashboardScene.action('exit-dashboard', ctx => {
     ctx.scene.leave()
 })
 
-dashboardScene.action('show-files', ctx => {
-    const files = db.adminDb.get(db.FILES_COLLECTION).value()
+dashboardScene.action('show-files', async ctx => {
+    const files = await filesCollection()
+        .find()
+        .toArray()
     if (files.length === 0) {
         return ctx.editMessageText('No episode uploaded', goHomeButton())
     }
@@ -46,26 +48,22 @@ dashboardScene.action('show-files', ctx => {
     ctx.editMessageText(episodes, goHomeButton())
 })
 
-dashboardScene.hears(Commons.epNameRegex, ctx => {
+dashboardScene.hears(Commons.epNameRegex, async ctx => {
     const epKey = ctx.match[1]
     ctx.session.epKey = epKey
 
-    const fileInfo = db.adminDb
-        .get(db.FILES_COLLECTION)
-        .find({ epKey })
-        .value()
+    const fileInfo = await filesCollection().findOne({ epKey })
     ctx.reply(
         `name: ${fileInfo.name}`,
         goHomeButton([Markup.callbackButton('Remove', 'remove-file')])
     )
 })
 
-dashboardScene.action('remove-file', ctx => {
-    const result = db.adminDb
-        .get(db.FILES_COLLECTION)
-        .remove({ epKey: ctx.session.epKey })
-        .write()
-    if (result.length === 1) {
+dashboardScene.action('remove-file', async ctx => {
+    const op = await filesCollection().deleteOne({
+        epKey: ctx.session.epKey
+    })
+    if (op.result.ok) {
         ctx.editMessageText(
             'File removed from collection',
             goHomeButton([Markup.callbackButton('Show files', 'show-files')])
@@ -83,7 +81,7 @@ dashboardScene.action('dashboard-main', ctx => {
     ctx.session.dashboardState = dashboardState.MAIN_MENU
 })
 
-dashboardScene.on('message', ctx => {
+dashboardScene.on('message', async ctx => {
     if (ctx.session.dashboardState !== dashboardState.SENDING_FILE) return
     // Todo: Music is audio
     const doc = ctx.message.document
@@ -107,11 +105,13 @@ dashboardScene.on('message', ctx => {
         name: doc.file_name,
         size: doc.file_size
     }
-    db.adminDb
-        .get(db.FILES_COLLECTION)
-        .push(fileInfo)
-        .write()
-    ctx.reply('Send another or hit back', goHomeButton())
+    const op = await filesCollection().insertOne(fileInfo)
+    if (op.result.ok) {
+        logger.info('File added')
+        ctx.reply('Send another or hit back', goHomeButton())
+    } else {
+        logger.error('Adding file failed - DB error', fileInfo)
+    }
 })
 
 module.exports = dashboardScene

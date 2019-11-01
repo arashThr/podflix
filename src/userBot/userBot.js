@@ -11,25 +11,29 @@ const dashboardScene = require('./dashboard')
 // User
 const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
-const User = require('./user')
+const { usersCollection } = require('../db')
 
 const bot = new Telegraf(configs.botToken)
 bot.use(session())
 
-const stage = new Stage([loginScene, dashboardScene, paymentWizard, userMenuScene])
+const stage = new Stage([
+    loginScene,
+    dashboardScene,
+    paymentWizard,
+    userMenuScene
+])
 bot.use(stage.middleware())
 bot.command('login', enter('login'))
 bot.command('dash', enter('dashboard'))
 
-bot.start(ctx => {
+bot.start(async ctx => {
     const tgUser = ctx.from
     if (tgUser.is_bot) return
 
-    const user = User.findUser(tgUser)
+    const user = await usersCollection().findOne({ chatId: tgUser.id })
 
     if (user) {
-        ctx.reply('Welcome back')
-        ctx.scene.enter('user-menu-scene')
+        ctx.reply('Welcome back').then(() => ctx.scene.enter('user-menu-scene'))
     } else {
         ctx.reply('You are unknown')
         ctx.scene.enter('payment-wizard')

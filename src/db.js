@@ -1,24 +1,29 @@
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
+const MongoClient = require('mongodb').MongoClient
+const configs = require('./configs')
+const logger = require('./logger')
 
-const adminDb = low(new FileSync('data/adminData.json'))
-const userDb = low(new FileSync('data/usersData.json'))
-
-const DB = {
-    adminDb,
-    userDb,
-    FILES_COLLECTION: 'files',
-    ADMIN_COLLECTION: 'admins',
-    USERS_COLLECTION: 'users'
+let db = null
+let client = null
+async function initDb() {
+    try {
+        if (db) {
+            logger.warn('Trying to init DB again!')
+            return db
+        }
+        const url = configs.mongoUrl
+        client = await MongoClient.connect(url, { useUnifiedTopology: true })
+        db = client.db(configs.dbName)
+        return db
+    } catch (err) {
+        logger.error(err)
+        throw err
+    }
 }
 
-const adminDbObj = {}
-adminDbObj[DB.FILES_COLLECTION] = []
-adminDbObj[DB.ADMIN_COLLECTION] = []
-adminDb.defaults(adminDbObj).write()
-
-const userDbObj = {}
-userDbObj[DB.USERS_COLLECTION] = []
-userDb.defaults(userDbObj).write()
-
-module.exports = DB
+module.exports = {
+    initDb,
+    getDb() { return db },
+    usersCollection() { return db.collection('users') },
+    filesCollection() { return db.collection('files') },
+    close: () => client.close()
+}
