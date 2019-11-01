@@ -2,6 +2,7 @@ const Telegraf = require('telegraf')
 const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
 const { enter } = Stage
+const configs = require('../configs')
 
 // Admin
 const loginScene = require('./loginScene')
@@ -12,7 +13,7 @@ const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
 const User = require('./user')
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
+const bot = new Telegraf(configs.botToken)
 bot.use(session())
 
 const stage = new Stage([loginScene, dashboardScene, paymentWizard, userMenuScene])

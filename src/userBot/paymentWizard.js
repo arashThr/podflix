@@ -3,11 +3,12 @@ const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
 const redis = require('redis')
 const { getPaymentLink } = require('../payment/payping')
+const configs = require('../configs')
 
 const logger = require('../logger')
 const User = require('./user')
 
-const sub = redis.createClient(process.env.REDIS_URL)
+const sub = redis.createClient(configs.redisUrl)
 sub.on('message', (channel, message) => {
     const { chatId, status } = JSON.parse(message)
     console.log('New message from ' + channel + ', message: ' + chatId)

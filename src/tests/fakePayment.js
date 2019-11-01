@@ -2,6 +2,7 @@ require('dotenv').config()
 const fetch = require('node-fetch')
 const querystring = require('querystring')
 const { getPaymentLink } = require('../payment/payping')
+const configs = require('../configs')
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -21,7 +22,7 @@ async function simulatePaymentProcess() {
         clientrefid: '4323'
     })
 
-    const url = process.env.PAYMENT_RETURN_ADDRESS + '/?' + qs
+    const url = configs.payping.returnUrl + '/?' + qs
     console.log('URL: ', url)
     const resp = await fetch(url, {
         method: 'GET'

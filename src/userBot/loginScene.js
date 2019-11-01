@@ -1,7 +1,8 @@
 const Scene = require('telegraf/scenes/base')
 const logger = require('../logger')
+const configs = require('../configs')
 
-const defaultAdmin = process.env.DEFAULT_CHAT_ID
+const defaultAdmin = configs.adminChatId
 const adminsId = defaultAdmin ? [String(defaultAdmin)] : []
 
 const loginScene = new Scene('login')

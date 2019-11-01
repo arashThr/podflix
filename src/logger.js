@@ -1,4 +1,5 @@
 const winston = require('winston')
+const configs = require('./configs')
 
 const logger = winston.createLogger({
     transports: [
@@ -6,8 +7,8 @@ const logger = winston.createLogger({
             format: winston.format.simple()
       })
     ]
-});
+})
 
-logger.level = process.env.LOG_LEVEL
+logger.level = configs.logLevel
 
 module.exports = logger

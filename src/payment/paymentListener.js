@@ -3,12 +3,13 @@ const fetch = require('node-fetch')
 const url = require('url')
 const redis = require('redis')
 const logger = require('../logger')
+const configs = require('../configs')
 
-const pub = redis.createClient(process.env.REDIS_URL)
+const pub = redis.createClient(configs.redisUrl)
 
 const app = express()
-const port = 3000
-const paypingReturnPath = new url.URL(process.env.PAYMENT_RETURN_ADDRESS)
+const port = configs.listenerPort
+const paypingReturnPath = new url.URL(configs.payping.returnUrl)
     .pathname
 
 // PayPing Return URL
@@ -25,22 +26,22 @@ app.get(paypingReturnPath, async (req, res) => {
         amount: 100,
         refId: refId
     })
-    const resp = await fetch(`${process.env.PAYPING_SERVER}/v1/pay/verify`, {
+    const resp = await fetch(`${configs.payping.server}/v1/pay/verify`, {
         method: 'POST',
         body: verifyBody,
         headers: {
             'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + process.env.PAYPING_TOKEN
+            Authorization: 'Bearer ' + configs.payping.token
         }
     })
-    const chatId = process.env.DEFAULT_CHAT_ID
+    const chatId = configs.adminChatId
     pub.publish('payment-verify', JSON.stringify({
         chatId, status: resp.status
     }))
 })
 
 // FOR PAYPING TESTING LOCAL
-if (process.env.NODE_ENV !== 'production') {
+if (configs.NODE_ENV !== 'production') {
     // Parse JSON bodies (as sent by API clients)
     app.use(express.json())
 
@@ -67,7 +68,7 @@ if (process.env.NODE_ENV !== 'production') {
             clientrefid: '4323'
         })
 
-        const url = process.env.PAYMENT_RETURN_ADDRESS + '/?' + qs
+        const url = configs.payping.returnUrl + '/?' + qs
         res.redirect(url)
     })
 }
