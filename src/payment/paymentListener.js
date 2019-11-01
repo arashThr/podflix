@@ -32,6 +32,7 @@ app.get(paypingReturnPath, async (req, res) => {
         }
     })
     const chatId = process.env.DEFAULT_CHAT_ID
+    // Todo: THERE IS NO PAYMENT IN TESTING
     const { resolve, reject } = Payments.getPayment(chatId)
 
     if (resp.status === 200) {
