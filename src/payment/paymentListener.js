@@ -1,8 +1,10 @@
 const express = require('express')
 const fetch = require('node-fetch')
-const Payments = require('./payment')
 const url = require('url')
+const redis = require('redis')
 const logger = require('../logger')
+
+const pub = redis.createClient(process.env.REDIS_URL)
 
 const app = express()
 const port = 3000
@@ -32,17 +34,9 @@ app.get(paypingReturnPath, async (req, res) => {
         }
     })
     const chatId = process.env.DEFAULT_CHAT_ID
-    // Todo: THERE IS NO PAYMENT IN TESTING
-    const { resolve, reject } = Payments.getPayment(chatId)
-
-    if (resp.status === 200) {
-        logger.verbose('Payment verifed')
-        resolve(chatId)
-    } else {
-        if (resp.status === 400) logger.verbose('Payment canceled')
-        else logger.error('Verification failed')
-        reject(chatId)
-    }
+    pub.publish('payment-verify', JSON.stringify({
+        chatId, status: resp.status
+    }))
 })
 
 // FOR PAYPING TESTING LOCAL

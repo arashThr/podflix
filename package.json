@@ -13,6 +13,7 @@
     "express": "^4.17.1",
     "lowdb": "^1.0.0",
     "node-fetch": "^2.6.0",
+    "redis": "^2.8.0",
     "telegraf": "^3.32.0",
     "winston": "^3.2.1"
   },

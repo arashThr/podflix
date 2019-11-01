@@ -1,10 +1,35 @@
 const Markup = require('telegraf/markup')
 const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
+const redis = require('redis')
 const { getPaymentLink } = require('../payment/payping')
 
-const Payments = require('../payment/payment')
+const logger = require('../logger')
 const User = require('./user')
+
+const sub = redis.createClient(process.env.REDIS_URL)
+sub.on('message', (channel, message) => {
+    const { chatId, status } = JSON.parse(message)
+    console.log('New message from ' + channel + ', message: ' + chatId)
+    const paymentPromise = payments.get(String(chatId))
+
+    if (!paymentPromise) {
+        logger.info('Payment verfied - No promise to resolve')
+        return
+    }
+
+    const { resolve, reject } = paymentPromise
+
+    if (status === 200) {
+        logger.verbose('Payment verifed')
+        resolve(chatId)
+    } else {
+        if (status === 400) logger.verbose('Payment canceled')
+        else logger.error('Verification failed')
+        reject(chatId)
+    }
+})
+sub.subscribe('payment-verify')
 
 const selectBuyStep = ctx => {
     ctx.reply(
@@ -16,6 +41,8 @@ const selectBuyStep = ctx => {
     )
     return ctx.wizard.next()
 }
+
+const payments = new Map()
 
 const paymentDecisonStep = new Composer()
 paymentDecisonStep.action('buy', ctx => {
@@ -37,7 +64,6 @@ sendPaymentLinkStep.action('iran', async ctx => {
         ctx.scene.leave()
         return
     }
-    console.log('LINK: ', link)
     ctx.editMessageText(
         'Pay from Iran',
         Markup.inlineKeyboard([
@@ -46,16 +72,16 @@ sendPaymentLinkStep.action('iran', async ctx => {
     )
 
     const paymentPromise = new Promise((resolve, reject) => {
-        Payments.addPay(ctx.chat.id, { resolve, reject })
+        payments.set(String(ctx.chat.id), { resolve, reject })
     })
 
     try {
-        console.log('Resolved: ' + (await paymentPromise))
+        logger.debug('Payment resolved: ' + (await paymentPromise))
         ctx.editMessageText('Success')
         User.addNewUser(ctx.from)
         ctx.scene.enter('user-menu-scene')
     } catch (e) {
-        console.log('Payment failed ... ', e)
+        logger.error('Payment failed ... ', e)
         ctx.editMessageText('Failed! - Please try again or contact us')
         ctx.scene.enter('payment-wizard')
     }
@@ -69,24 +95,11 @@ sendPaymentLinkStep.action('tg-payment', ctx => {
     )
 })
 
-const waitForPaymentStep = new Composer()
-waitForPaymentStep.use(ctx => {
-    console.log('AFTER')
-
-    ctx.reply('Done111')
-    ctx.scene.leave()
-})
-
 const paymentWizard = new WizardScene(
     'payment-wizard',
     selectBuyStep,
     paymentDecisonStep,
-    sendPaymentLinkStep,
-    waitForPaymentStep,
-    ctx => {
-        ctx.reply('Done')
-        return ctx.scene.leave()
-    }
+    sendPaymentLinkStep
 )
 
 module.exports = paymentWizard
