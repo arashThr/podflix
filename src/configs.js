@@ -9,8 +9,12 @@ module.exports = {
     mongoUrl: process.env.MONGO_URL || 'mongodb://localhost:27017',
     dbName: process.env.DB_NAME || 'podflix',
 
+    admin: {
+        chatId: process.env.ADMIN_CHAT_ID,
+        pass: process.env.ADMIN_PASS || 'dw2!3rS%s',
+        disableLoginWithPass: false
+    },
     botToken: process.env.BOT_TOKEN,
-    adminChatId: process.env.ADMIN_CHAT_ID,
 
     payping: {
         server: process.env.PAYPING_SERVER || 'https://api.payping.ir',

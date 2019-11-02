@@ -16,7 +16,7 @@ async function simulatePaymentProcess() {
         created: new Date(),
         updated: new Date(),
         status: 'req',
-        user: { chatId: configs.adminChatId },
+        user: { chatId: configs.admin.chatId },
         price
     })
     if (!op.result.ok) {
@@ -27,7 +27,7 @@ async function simulatePaymentProcess() {
     const link = await getPaymentLink({
         amount: price,
         clientRefId,
-        payerIdentity: configs.adminChatId,
+        payerIdentity: configs.admin.chatId,
         payerName: 'Arash'
     })
     console.log('Link is: ', link)

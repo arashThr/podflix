@@ -24,7 +24,6 @@ const stage = new Stage([
 ])
 bot.use(stage.middleware())
 bot.command('login', enter('login'))
-bot.command('dash', enter('dashboard'))
 
 bot.start(async ctx => {
     const tgUser = ctx.from
