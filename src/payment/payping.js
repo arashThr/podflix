@@ -2,15 +2,8 @@ const fetch = require('node-fetch')
 const logger = require('../logger')
 const configs = require('../configs')
 
-async function getPaymentCode(amount) {
-    const paymentBody = JSON.stringify({
-        amount,
-        returnUrl: configs.payping.returnUrl,
-        payerIdentity: 'PId',
-        payerName: 'PName',
-        description: 'Desc',
-        clientRefId: 'CRFID'
-    })
+async function getPaymentCode(payload) {
+    const paymentBody = JSON.stringify(payload)
 
     const paymentUrl = configs.payping.server + '/v1/pay'
     logger.debug('Sending request to get to code ...', paymentUrl)
@@ -31,15 +24,17 @@ async function getPaymentCode(amount) {
     return jsonResp.code
 }
 
-async function getPaymentLink(amount) {
-    const code = await getPaymentCode(amount)
+async function getPaymentLink(payload) {
+    payload.returnUrl = configs.payping.returnUrl
+    payload.description = 'Podflix payment'
+    const code = await getPaymentCode(payload)
     if (code) return `${configs.payping.server}/v1/pay/gotoipg/${code}`
     return null
 }
 
-async function verifyPayment(amount, refId) {
+async function verifyPayment(price, refId) {
     const verifyBody = JSON.stringify({
-        amount,
+        amount: price,
         refId: refId
     })
     const resp = await fetch(configs.payping.server + '/v1/pay/verify', {

@@ -4,6 +4,8 @@ const url = require('url')
 const redis = require('redis')
 const logger = require('../logger')
 const configs = require('../configs')
+const { paymentsCollection } = require('../db')
+const { ObjectId } = require('mongodb')
 
 const pub = redis.createClient(configs.redisUrl)
 
@@ -18,12 +20,21 @@ app.get(paypingReturnPath, async (req, res) => {
     const refId = req.query.refid
     const clientRefId = req.query.clientrefid
 
-    console.log(`Ref: ${refId}, client: ${clientRefId}`)
-    console.log('Doing verfication ....')
+    logger.info(`Return URL called - Ref: ${refId}, clientId: ${clientRefId}`)
+
+    if (!ObjectId.isValid(clientRefId)) {
+        logger.error('Object id is not valid: ', clientRefId)
+        res.sendStatus(404)
+        return
+    }
     res.sendStatus(200)
 
+    const payment = await paymentsCollection().findOne(
+        new ObjectId(clientRefId)
+    )
+
     const verifyBody = JSON.stringify({
-        amount: 100,
+        amount: payment.price,
         refId: refId
     })
     const resp = await fetch(`${configs.payping.server}/v1/pay/verify`, {
@@ -34,19 +45,26 @@ app.get(paypingReturnPath, async (req, res) => {
             Authorization: 'Bearer ' + configs.payping.token
         }
     })
-    const chatId = configs.adminChatId
-    pub.publish('payment-verify', JSON.stringify({
-        chatId, status: resp.status
-    }))
+    const chatId = payment.user.chatId
+    pub.publish(
+        'payment-verify',
+        JSON.stringify({
+            chatId,
+            refId,
+            status: resp.status
+        })
+    )
 })
 
 // FOR PAYPING TESTING LOCAL
 if (configs.NODE_ENV !== 'production') {
+    let payId
     // Parse JSON bodies (as sent by API clients)
     app.use(express.json())
 
     app.post('/v1/pay', (req, res) => {
         console.log('New request', req.url)
+        payId = req.body.clientRefId
         console.log('Sendgin to code ...')
         res.send(
             JSON.stringify({
@@ -56,7 +74,7 @@ if (configs.NODE_ENV !== 'production') {
     })
 
     app.post('/v1/pay/verify', (req, res) => {
-        console.log('Verfication called for amount: ', req.body)
+        console.log('Verfication called for price: ', req.body)
         res.sendStatus(200)
     })
 
@@ -64,8 +82,8 @@ if (configs.NODE_ENV !== 'production') {
     app.get('/v1/pay/gotoipg/*', async (req, res) => {
         console.log('Doing pyament')
         const qs = querystring.stringify({
-            refid: '1250',
-            clientrefid: '4323'
+            refid: 'refId123',
+            clientrefid: payId
         })
 
         const url = configs.payping.returnUrl + '/?' + qs

@@ -25,5 +25,6 @@ module.exports = {
     getDb() { return db },
     usersCollection() { return db.collection('users') },
     filesCollection() { return db.collection('files') },
+    paymentsCollection() { return db.collection('payments') },
     close: () => client.close()
 }

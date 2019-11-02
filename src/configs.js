@@ -16,5 +16,9 @@ module.exports = {
         server: process.env.PAYPING_SERVER || 'https://api.payping.ir',
         returnUrl: process.env.PAYMENT_RETURN_ADDRESS,
         token: process.env.PAYPING_TOKEN
+    },
+
+    app: {
+        price: process.env.APP_PRICE || 100
     }
 }
