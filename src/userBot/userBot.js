@@ -34,12 +34,24 @@ bot.start(async ctx => {
     if (user) {
         ctx.reply('Welcome back').then(() => ctx.scene.enter('user-menu-scene'))
     } else {
-        ctx.reply('You are unknown')
-        ctx.scene.enter('payment-wizard')
+        ctx.reply('You are unknown').then(() =>
+            ctx.scene.enter('payment-wizard')
+        )
     }
 })
 
 exports.launchBot = function launchBot() {
+    // const secretPath =
+    //     '/' +
+    //     Math.random()
+    //         .toString(36)
+    //         .substring(2, 8)
+
+    // bot.telegram.setWebhook(configs.serverUrl + secretPath)
+    // bot.startWebhook(secretPath)
+    // require('http')
+    //     .createServer(bot.webhookCallback(secretPath))
+    //     .listen(configs.botPort)
     bot.launch()
     console.log('Bot started')
 }

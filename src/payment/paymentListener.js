@@ -57,7 +57,7 @@ app.get(paypingReturnPath, async (req, res) => {
 })
 
 // FOR PAYPING TESTING LOCAL
-if (configs.NODE_ENV !== 'production') {
+if (configs.isInDev) {
     let payId
     // Parse JSON bodies (as sent by API clients)
     app.use(express.json())
