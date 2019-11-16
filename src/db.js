@@ -25,6 +25,7 @@ module.exports = {
     getDb() { return db },
     usersCollection() { return db.collection('users') },
     filesCollection() { return db.collection('files') },
-    paymentsCollection() { return db.collection('payments') },
+    rialPaymentsCollection() { return db.collection('irrPayments') },
+    usdPaymentsCollection() { return db.collection('usdPayments') },
     close: () => client.close()
 }

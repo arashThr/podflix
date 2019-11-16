@@ -6,7 +6,13 @@ const { getPaymentLink } = require('../payment/payping')
 const configs = require('../configs')
 
 const logger = require('../logger')
-const { usersCollection, paymentsCollection } = require('../db')
+const { usersCollection, rialPaymentsCollection } = require('../db')
+
+const paymentState = {
+    requestedLink: 'requested',
+    canceled: 'canceled',
+    successful: 'success'
+}
 
 const sub = redis.createClient(configs.redisUrl)
 sub.on('message', (channel, message) => {
@@ -37,7 +43,7 @@ const selectBuyStep = ctx => {
         'Episode descriptions',
         Markup.inlineKeyboard([
             Markup.callbackButton('Buy', 'buy'),
-            Markup.urlButton('Visit site', 'https://google.com')
+            Markup.urlButton('Visit site', configs.serverUrl)
         ]).extra()
     )
     return ctx.wizard.next()
@@ -57,25 +63,11 @@ paymentDecisonStep.action('buy', ctx => {
     return ctx.wizard.next()
 })
 
-const paymentState = {
-    requestedLink: 'requested',
-    canceled: 'canceled',
-    successful: 'success'
-}
-
 const sendPaymentLinkStep = new Composer()
 sendPaymentLinkStep.action('iran', async ctx => {
     const price = configs.app.price
     const user = getUserFrom(ctx.from)
-    const payment = {
-        created: new Date(),
-        updated: new Date(),
-        status: paymentState.requestedLink,
-        user,
-        price
-    }
-    const payRes = await paymentsCollection().insertOne(payment)
-    const payId = payRes.insertedId
+    const payId = await initPay(rialPaymentsCollection(), user, price)
 
     const link = await getPaymentLink({
         amount: price,
@@ -83,60 +75,11 @@ sendPaymentLinkStep.action('iran', async ctx => {
         payerIdentity: user.chatId,
         payerName: user.realName
     })
-    if (!link) {
-        logger.error('Getting payment link failed for ', ctx.from)
-        ctx.editMessageText(
-            'Getting payment link failed. Try again later - /start'
-        )
-        ctx.scene.leave()
-        return
-    }
 
-    const paymentPromise = new Promise((resolve, reject) => {
-        payments.set(String(ctx.chat.id), { resolve, reject })
-    })
-
-    try {
-        await ctx.editMessageText(
-            'Pay from Iran',
-            Markup.inlineKeyboard([Markup.urlButton('Pay', link)]).extra()
-        )
-
-        const refId = await paymentPromise
-        logger.debug('Payment resolved with ref id of: ' + refId)
-
-        await paymentsCollection().updateOne({ _id: payId }, {
-            $set: {
-                refId,
-                updated: new Date(),
-                status: paymentState.successful
-            }
-        })
-
-        user.paymentId = payId
-        const { result } = await usersCollection().insertOne(user)
-
-        if (result.ok) {
-            ctx.editMessageText('Success')
-            ctx.scene.enter('user-menu-scene')
-        } else {
-            ctx.reply('User add failed')
-            ctx.scene.leave()
-        }
-    } catch (e) {
-        logger.error('Payment canceled ... ', user, e)
-        ctx.editMessageText('Payment canceled. Please try again or contact us')
-        paymentsCollection().updateOne({ _id: payId }, {
-            $set: {
-                updated: new Date(),
-                status: paymentState.canceled
-            }
-        })
-
-        ctx.scene.enter('payment-wizard')
-    }
+    await fulfillPayment(link, ctx, rialPaymentsCollection(), payId)
 })
 sendPaymentLinkStep.action('tg-payment', ctx => {
+    // Stripe: create page => const sessionId = await getStripeSessionId()
     ctx.editMessageText(
         'Pay with telegram payment. Open this URL:',
         Markup.inlineKeyboard([
@@ -162,5 +105,79 @@ const paymentWizard = new WizardScene(
     paymentDecisonStep,
     sendPaymentLinkStep
 )
+
+async function initPay(moneyCollection, user, price) {
+    const payment = {
+        created: new Date(),
+        updated: new Date(),
+        status: paymentState.requestedLink,
+        user,
+        price
+    }
+    const payRes = await moneyCollection.insertOne(payment)
+    const payId = payRes.insertedId
+    return payId
+}
+
+async function fulfillPayment(link, ctx, moneyCollection, payId) {
+    const user = getUserFrom(ctx.from)
+
+    if (!link) {
+        logger.error('Getting payment link failed for ', ctx.from)
+        ctx.editMessageText(
+            'Getting payment link failed. Try again later - /start'
+        )
+        ctx.scene.leave()
+        return
+    }
+    await ctx.editMessageText(
+        'Click to pay',
+        Markup.inlineKeyboard([Markup.urlButton('Pay', link)]).extra()
+    )
+    try {
+        const result = await waitForPayment(user, moneyCollection, payId)
+
+        if (result.ok) {
+            ctx.editMessageText('Success')
+            ctx.scene.enter('user-menu-scene')
+        } else {
+            ctx.reply('User add failed')
+            ctx.scene.leave()
+        }
+    } catch (e) {
+        logger.error('Payment canceled ... ', user, e)
+        ctx.editMessageText('Payment canceled. Please try again or contact us')
+        moneyCollection.updateOne({ _id: payId }, {
+            $set: {
+                updated: new Date(),
+                status: paymentState.canceled
+            }
+        })
+
+        ctx.scene.enter('payment-wizard')
+    }
+}
+
+async function waitForPayment(user, moneyCollection, payId) {
+    const paymentPromise = new Promise((resolve, reject) => {
+        payments.set(String(user.chatId), { resolve, reject })
+    })
+
+    const refId = await paymentPromise
+
+    logger.debug('Payment resolved with ref id of: ' + refId)
+
+    await moneyCollection.updateOne({ _id: payId }, {
+        $set: {
+            refId,
+            updated: new Date(),
+            status: paymentState.successful
+        }
+    })
+
+    user.paymentId = payId
+    const { result } = await usersCollection().insertOne(user)
+    return result
+}
 
 module.exports = paymentWizard
