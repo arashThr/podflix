@@ -1,11 +1,11 @@
 const express = require('express')
-const fetch = require('node-fetch')
 const url = require('url')
 const redis = require('redis')
 const logger = require('../logger')
 const configs = require('../configs')
 const { paymentsCollection } = require('../db')
 const { ObjectId } = require('mongodb')
+const { verifyPayment } = require('./payping')
 
 const pub = redis.createClient(configs.redisUrl)
 
@@ -14,7 +14,6 @@ const port = configs.listenerPort
 const paypingReturnPath = new url.URL(configs.payping.returnUrl)
     .pathname
 
-// PayPing Return URL
 app.get(paypingReturnPath, async (req, res) => {
     console.log('Payment is done. Return URL called')
     const refId = req.query.refid
@@ -33,18 +32,8 @@ app.get(paypingReturnPath, async (req, res) => {
         new ObjectId(clientRefId)
     )
 
-    const verifyBody = JSON.stringify({
-        amount: payment.price,
-        refId: refId
-    })
-    const resp = await fetch(`${configs.payping.server}/v1/pay/verify`, {
-        method: 'POST',
-        body: verifyBody,
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + configs.payping.token
-        }
-    })
+    const resp = await verifyPayment(payment.price, refId)
+
     const chatId = payment.user.chatId
     pub.publish(
         'payment-verify',

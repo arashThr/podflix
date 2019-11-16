@@ -37,18 +37,22 @@ async function verifyPayment(price, refId) {
         amount: price,
         refId: refId
     })
-    const resp = await fetch(configs.payping.server + '/v1/pay/verify', {
+    const resp = await fetch(`${configs.payping.server}/v1/pay/verify`, {
         method: 'POST',
-        body: verifyBody
+        body: verifyBody,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + configs.payping.token
+        }
     })
 
     if (resp.status === 200) {
         logger.debug('Payment verifed', verifyBody)
-        return true
     } else {
         logger.error('Verification failed', verifyBody)
-        return false
     }
+
+    return resp.status
 }
 
 module.exports = { getPaymentLink, verifyPayment }
