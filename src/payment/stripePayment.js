@@ -1,15 +1,22 @@
+const path = require('path')
 const configs = require('../configs')
 const stripe = require('stripe')(configs.stripe.secret)
 const express = require('express')
 const app = express()
 
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, './views'))
+
 const webhookPath = '/paysuccess'
 
-app.use(express.static('./static'))
+app.use(express.static(path.join(__dirname, './static')))
 
 app.get('/', async (req, res) => {
-    const html = await pay()
-    res.send(html)
+    const sessionId = await getStripeSessionId()
+    res.render('stripe-checkout', {
+        sessionId,
+        stripePublic: configs.stripe.public
+    })
 })
 
 // Fetch the Checkout Session to display the JSON result on the success page
@@ -33,9 +40,10 @@ app.post(webhookPath, async (req, res) => {
 
 app.listen(3000, () => console.log(`Node server listening on port ${3000}!`))
 
-async function pay() {
+async function getStripeSessionId() {
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
+        client_reference_id: 'lalala123',
         line_items: [
             {
                 name: 'T-shirt',
@@ -50,39 +58,5 @@ async function pay() {
         cancel_url: `${configs.serverUrl}/canceled.html`
     })
 
-    return portalPage(session.id, 'clientRefId1')
-}
-
-function portalPage(sessionId, clientRefId) {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Go to Pay</title>
-        <meta charset="utf-8" />
-        <script src="https://js.stripe.com/v3/"></script>
-
-        <script>
-            alert('We are here')
-            var stripe = Stripe('${configs.stripe.public}');
-            var handleResult = function(result) {
-                if (result.error) {
-                    var displayError = document.getElementById('error-message')
-                    displayError.textContent = result.error.message
-                }
-            }
-
-            stripe
-                .redirectToCheckout({
-                    sessionId: '${sessionId}',
-                    client_reference_id: '${clientRefId}',
-                })
-                .then(handleResult)
-        </script>
-    </head>
-    <body>
-        <div id="error-message"></div>       
-    </body>
-</html>
-`
+    return session.id
 }

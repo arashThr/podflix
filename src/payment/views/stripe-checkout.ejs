@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Go to Pay</title>
+        <meta charset="utf-8" />
+        <script src="https://js.stripe.com/v3/"></script>
+
+        <script>
+            alert('We are here')
+            var stripe = Stripe('<%= stripePublic %>');
+            var handleResult = function(result) {
+                if (result.error) {
+                    var displayError = document.getElementById('error-message')
+                    displayError.textContent = result.error.message
+                }
+            }
+
+            stripe
+                .redirectToCheckout({
+                    sessionId: '<%= sessionId %>'
+                })
+                .then(handleResult)
+        </script>
+    </head>
+    <body>
+        <div id="error-message"></div>
+    </body>
+</html>
