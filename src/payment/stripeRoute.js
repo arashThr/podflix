@@ -1,13 +1,11 @@
 const configs = require('../configs')
-const path = require('path')
+const logger = require('../logger')
 const stripe = require('stripe')(configs.stripe.secret)
 const express = require('express')
 
 const router = express.Router()
 
 const webhookPath = '/paysuccess'
-
-router.use(express.static(path.join(__dirname, './static')))
 
 router.get('/', async (req, res) => {
     const sessionId = await getStripeSessionId()
@@ -17,11 +15,22 @@ router.get('/', async (req, res) => {
     })
 })
 
-// Fetch the Checkout Session to display the JSON result on the success page
-router.get('/checkout-session', async (req, res) => {
-    const { sessionId } = req.query
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
-    res.send(session)
+router.get('/success', async (req, res) => {
+    const sessionId = req.query.session_id
+    try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId)
+        var sessionJSON = JSON.stringify(session, null, 2)
+        res.render('stripe-success', {
+            session: sessionJSON
+        })
+    } catch (err) {
+        logger.error('Error when fetching Checkout session', err)
+        res.send('Error occured when trying to fetch payment details')
+    }
+})
+
+router.get('/canceled', (req, res) => {
+    res.render('stripe-canceled')
 })
 
 // Webhook handler for asynchronous events.
@@ -50,7 +59,7 @@ async function getStripeSessionId() {
                 quantity: 1
             }
         ],
-        success_url: `${configs.serverUrl}${configs.stripe.route}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${configs.serverUrl}${configs.stripe.route}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${configs.serverUrl}${configs.stripe.route}/canceled.html`
     })
 
