@@ -29,4 +29,9 @@ configs.payping = {
     token: process.env.PAYPING_TOKEN
 }
 
+configs.stripe = {
+    secret: process.env.STRIPE_SECRET,
+    public: process.env.STRIPE_PUBLIC
+}
+
 module.exports = configs
