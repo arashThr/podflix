@@ -1,5 +1,5 @@
 const { launchBot } = require('./userBot/userBot')
-const { startListen } = require('./payment/paymentListener')
+const { startListen } = require('./payment/paymentServers')
 const { initDb } = require('./db')
 
 async function start() {

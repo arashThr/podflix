@@ -29,8 +29,9 @@
         <script>
             var urlParams = new URLSearchParams(window.location.search)
             var sessionId = urlParams.get('session_id')
+            // TODO
             if (sessionId) {
-                fetch('/checkout-session?sessionId=' + sessionId)
+                fetch('/stripe/checkout-session?sessionId=' + sessionId)
                     .then(function(result) {
                         return result.json()
                     })

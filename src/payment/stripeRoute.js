@@ -1,17 +1,15 @@
-const path = require('path')
 const configs = require('../configs')
+const path = require('path')
 const stripe = require('stripe')(configs.stripe.secret)
 const express = require('express')
-const app = express()
 
-app.set('view engine', 'ejs')
-app.set('views', path.join(__dirname, './views'))
+const router = express.Router()
 
 const webhookPath = '/paysuccess'
 
-app.use(express.static(path.join(__dirname, './static')))
+router.use(express.static(path.join(__dirname, './static')))
 
-app.get('/', async (req, res) => {
+router.get('/', async (req, res) => {
     const sessionId = await getStripeSessionId()
     res.render('stripe-checkout', {
         sessionId,
@@ -20,14 +18,14 @@ app.get('/', async (req, res) => {
 })
 
 // Fetch the Checkout Session to display the JSON result on the success page
-app.get('/checkout-session', async (req, res) => {
+router.get('/checkout-session', async (req, res) => {
     const { sessionId } = req.query
     const session = await stripe.checkout.sessions.retrieve(sessionId)
     res.send(session)
 })
 
 // Webhook handler for asynchronous events.
-app.post(webhookPath, async (req, res) => {
+router.post(webhookPath, async (req, res) => {
     const data = req.body.data
     const eventType = req.body.type
 
@@ -37,8 +35,6 @@ app.post(webhookPath, async (req, res) => {
 
     res.sendStatus(200)
 })
-
-app.listen(3000, () => console.log(`Node server listening on port ${3000}!`))
 
 async function getStripeSessionId() {
     const session = await stripe.checkout.sessions.create({
@@ -54,9 +50,11 @@ async function getStripeSessionId() {
                 quantity: 1
             }
         ],
-        success_url: `${configs.serverUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${configs.serverUrl}/canceled.html`
+        success_url: `${configs.serverUrl}${configs.stripe.route}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${configs.serverUrl}${configs.stripe.route}/canceled.html`
     })
 
     return session.id
 }
+
+exports.stripeRouter = router

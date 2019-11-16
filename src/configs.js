@@ -1,5 +1,10 @@
 const dotenv = require('dotenv')
-dotenv.config()
+const result = dotenv.config()
+
+if (result.error) {
+    console.error('No .env file found. Terminating the program')
+    throw result.error
+}
 
 const configs = {
     listenerPort: 3000,
@@ -25,13 +30,15 @@ const configs = {
 
 configs.payping = {
     server: process.env.PAYPING_SERVER || 'https://api.payping.ir',
-    returnUrl: configs.serverUrl + '/payping-done',
+    returnPath: '/payping-done',
+    route: '/payping',
     token: process.env.PAYPING_TOKEN
 }
 
 configs.stripe = {
     secret: process.env.STRIPE_SECRET,
-    public: process.env.STRIPE_PUBLIC
+    public: process.env.STRIPE_PUBLIC,
+    route: '/stripe'
 }
 
 module.exports = configs

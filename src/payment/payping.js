@@ -6,7 +6,7 @@ async function getPaymentCode(payload) {
     const paymentBody = JSON.stringify(payload)
 
     const paymentUrl = configs.payping.server + '/v1/pay'
-    logger.debug('Sending request to get to code ...', paymentUrl)
+    logger.debug('Sending request to get to code ...' + paymentUrl)
     const resp = await fetch(paymentUrl, {
         method: 'POST',
         body: paymentBody,
@@ -25,7 +25,7 @@ async function getPaymentCode(payload) {
 }
 
 async function getPaymentLink(payload) {
-    payload.returnUrl = configs.payping.returnUrl
+    payload.returnUrl = `${configs.serverUrl}${configs.payping.route}${configs.payping.returnPath}`
     payload.description = 'Podflix payment'
     const code = await getPaymentCode(payload)
     if (code) return `${configs.payping.server}/v1/pay/gotoipg/${code}`
@@ -55,4 +55,7 @@ async function verifyPayment(price, refId) {
     return resp.status
 }
 
-module.exports = { getPaymentLink, verifyPayment }
+module.exports = {
+    getPaymentLink,
+    verifyPayment
+}

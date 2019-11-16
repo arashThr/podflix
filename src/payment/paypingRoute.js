@@ -1,5 +1,4 @@
 const express = require('express')
-const url = require('url')
 const redis = require('redis')
 const logger = require('../logger')
 const configs = require('../configs')
@@ -9,12 +8,9 @@ const { verifyPayment } = require('./payping')
 
 const pub = redis.createClient(configs.redisUrl)
 
-const app = express()
-const port = configs.listenerPort
-const paypingReturnPath = new url.URL(configs.payping.returnUrl)
-    .pathname
+const router = express.Router()
 
-app.get(paypingReturnPath, async (req, res) => {
+router.get(configs.payping.returnPath, async (req, res) => {
     console.log('Payment is done. Return URL called')
     const refId = req.query.refid
     const clientRefId = req.query.clientrefid
@@ -32,7 +28,7 @@ app.get(paypingReturnPath, async (req, res) => {
         new ObjectId(clientRefId)
     )
 
-    const resp = await verifyPayment(payment.price, refId)
+    const respStatus = await verifyPayment(payment.price, refId)
 
     const chatId = payment.user.chatId
     pub.publish(
@@ -40,46 +36,11 @@ app.get(paypingReturnPath, async (req, res) => {
         JSON.stringify({
             chatId,
             refId,
-            status: resp.status
+            status: respStatus
         })
     )
 })
 
-// FOR PAYPING TESTING LOCAL
-if (configs.isInDev) {
-    let payId
-    // Parse JSON bodies (as sent by API clients)
-    app.use(express.json())
-
-    app.post('/v1/pay', (req, res) => {
-        console.log('New request', req.url)
-        payId = req.body.clientRefId
-        console.log('Sendgin to code ...')
-        res.send(
-            JSON.stringify({
-                code: '8c649a'
-            })
-        )
-    })
-
-    app.post('/v1/pay/verify', (req, res) => {
-        console.log('Verfication called for price: ', req.body)
-        res.sendStatus(200)
-    })
-
-    const querystring = require('querystring')
-    app.get('/v1/pay/gotoipg/*', async (req, res) => {
-        console.log('Doing pyament')
-        const qs = querystring.stringify({
-            refid: 'refId123',
-            clientrefid: payId
-        })
-
-        const url = configs.payping.returnUrl + '/?' + qs
-        res.redirect(url)
-    })
-}
-
-exports.startListen = function startListen() {
-    app.listen(port, () => logger.info(`Payment server start on port ${port}!`))
+module.exports = {
+    paypingRouter: router
 }
