@@ -3,10 +3,11 @@ const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
 const redis = require('redis')
 const { getPaymentLink } = require('../payment/payping')
+const { getStripePaymentLink } = require('../payment/stripeRoute')
 const configs = require('../configs')
 
 const logger = require('../logger')
-const { usersCollection, rialPaymentsCollection } = require('../db')
+const { usersCollection, rialPaymentsCollection, usdPaymentsCollection } = require('../db')
 
 const paymentState = {
     requestedLink: 'requested',
@@ -16,9 +17,9 @@ const paymentState = {
 
 const sub = redis.createClient(configs.redisUrl)
 sub.on('message', (channel, message) => {
-    const { chatId, refId, status } = JSON.parse(message)
-    console.log('New message from ' + channel + ', message: ' + chatId)
-    const paymentPromise = payments.get(String(chatId))
+    const { clientRefId, successful } = JSON.parse(message)
+    logger.verbose(`New message for ${channel}, refId: ${clientRefId}, successful: ${successful}`)
+    const paymentPromise = payments.get(clientRefId)
 
     if (!paymentPromise) {
         logger.info('Payment verfied - No promise to resolve')
@@ -27,13 +28,12 @@ sub.on('message', (channel, message) => {
 
     const { resolve, reject } = paymentPromise
 
-    if (status === 200) {
+    if (successful) {
         logger.verbose('Payment verifed')
-        resolve(refId)
+        resolve(clientRefId)
     } else {
-        if (status === 400) logger.verbose('Payment canceled')
-        else logger.error('Verification failed')
-        reject(refId)
+        logger.verbose('Payment failed')
+        reject(clientRefId)
     }
 })
 sub.subscribe('payment-verify')
@@ -78,14 +78,19 @@ sendPaymentLinkStep.action('iran', async ctx => {
 
     await fulfillPayment(link, ctx, rialPaymentsCollection(), payId)
 })
-sendPaymentLinkStep.action('tg-payment', ctx => {
-    // Stripe: create page => const sessionId = await getStripeSessionId()
-    ctx.editMessageText(
-        'Pay with telegram payment. Open this URL:',
-        Markup.inlineKeyboard([
-            Markup.urlButton('Telegram Payment', 'http://google.com')
-        ]).extra()
-    )
+sendPaymentLinkStep.action('tg-payment', async ctx => {
+    const price = configs.app.usdPrice
+    const user = getUserFrom(ctx.from)
+    const payId = await initPay(usdPaymentsCollection(), user, price)
+
+    const link = await getStripePaymentLink({
+        amount: price,
+        clientRefId: payId.toString()
+    })
+
+    logger.debug('Stripe payment link: ' + link)
+
+    await fulfillPayment(link, ctx, rialPaymentsCollection(), payId)
 })
 
 function getUserFrom(tgUser) {
@@ -160,7 +165,7 @@ async function fulfillPayment(link, ctx, moneyCollection, payId) {
 
 async function waitForPayment(user, moneyCollection, payId) {
     const paymentPromise = new Promise((resolve, reject) => {
-        payments.set(String(user.chatId), { resolve, reject })
+        payments.set(String(payId), { resolve, reject })
     })
 
     const refId = await paymentPromise
