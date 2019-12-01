@@ -28,15 +28,13 @@ router.get(configs.payping.returnPath, async (req, res) => {
         new ObjectId(clientRefId)
     )
 
-    const respStatus = await verifyPayment(payment.price, refId)
+    const verified = await verifyPayment(payment.price, refId)
 
-    const chatId = payment.user.chatId
     pub.publish(
         'payment-verify',
         JSON.stringify({
-            chatId,
-            refId,
-            status: respStatus
+            clientRefId,
+            successful: verified
         })
     )
 })

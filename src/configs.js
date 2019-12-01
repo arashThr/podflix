@@ -24,7 +24,8 @@ const configs = {
     botPort: process.env.BOT_PORT || 8443,
 
     app: {
-        price: process.env.APP_PRICE || 100
+        price: process.env.APP_PRICE || 100,
+        usdPrice: 500
     }
 }
 

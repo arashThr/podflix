@@ -47,12 +47,13 @@ async function verifyPayment(price, refId) {
     })
 
     if (resp.status === 200) {
-        logger.debug('Payment verifed', verifyBody)
+        logger.debug('Payment verifed')
+    } else if (resp.status === 400) {
+        logger.debug('Payment canceled')
     } else {
         logger.error('Verification failed', verifyBody)
     }
-
-    return resp.status
+    return resp.status === 200
 }
 
 module.exports = {
