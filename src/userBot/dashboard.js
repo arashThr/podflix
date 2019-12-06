@@ -54,7 +54,9 @@ dashboardScene.hears(Commons.epNameRegex, async ctx => {
 
     const fileInfo = await filesCollection().findOne({ epKey })
     ctx.reply(
-        `name: ${fileInfo.name}`,
+        `🗃
+name: ${fileInfo.name}
+caption: ${fileInfo.caption}`,
         goHomeButton([Markup.callbackButton('Remove', 'remove-file')])
     )
 })
@@ -73,7 +75,7 @@ dashboardScene.action('remove-file', async ctx => {
 
 dashboardScene.action('add-file', ctx => {
     ctx.session.dashboardState = dashboardState.SENDING_FILE
-    ctx.editMessageText('Send file or press back', goHomeButton())
+    ctx.editMessageText('Forward or Send file; Otherwise press back', goHomeButton())
 })
 
 dashboardScene.action('dashboard-main', ctx => {
@@ -103,6 +105,7 @@ dashboardScene.on('message', async ctx => {
         epKey,
         fileId: doc.file_id,
         name: doc.file_name,
+        caption: ctx.message.caption || '',
         size: doc.file_size
     }
     const op = await filesCollection().insertOne(fileInfo)

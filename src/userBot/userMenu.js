@@ -47,9 +47,12 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
     try {
         ctx.replyWithDocument(
             fileInfo.fileId,
-            Markup.inlineKeyboard([
-                Markup.callbackButton('Get home', 'user-menu-reply')
-            ]).extra()
+            {
+                caption: fileInfo.caption,
+                reply_markup: Markup.inlineKeyboard([
+                    Markup.callbackButton('Get home', 'user-menu-reply')
+                ])
+            }
         )
     } catch (e) {
         ctx.reply('Error occured')
