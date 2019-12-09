@@ -1,7 +1,7 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
-const { filesCollection } = require('../db')
+const { filesCollection, usersCollection } = require('../db')
 const Commons = require('../common')
 
 const dashboardScene = new Scene('dashboard')
@@ -111,10 +111,44 @@ dashboardScene.on('message', async ctx => {
     const op = await filesCollection().insertOne(fileInfo)
     if (op.result.ok) {
         logger.info('File added')
+        broadcastNewFile(ctx, fileInfo)
         ctx.reply('Send another or hit back', goHomeButton())
     } else {
         logger.error('Adding file failed - DB error', fileInfo)
     }
 })
+
+// There is limitation on how many users a bot can reach per second
+// BoardcastNewFile function takes care of this limitation
+// More info: https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this
+async function broadcastNewFile(ctx, fileInfo) {
+    const usersChatIds = await usersCollection()
+        .find()
+        .project({ chatId: 1, _id: 0 })
+        .toArray()
+
+    function sendFile(chatIds, i = 0) {
+        setTimeout(async () => {
+            if (i >= chatIds.length) {
+                return
+            }
+            const chatId = chatIds[i]
+            logger.debug('Broadcasting file to ' + chatId)
+            await ctx.telegram.sendDocument(chatId,
+                fileInfo.fileId,
+                {
+                    caption: 'New episode released!\n' + fileInfo.caption,
+                    reply_markup: Markup.inlineKeyboard([
+                        Markup.callbackButton('Get home', 'user-menu-reply')
+                    ])
+                }
+            )
+            sendFile(chatIds, i + 1)
+        }, 100) // Send message to ten users in each second
+    }
+
+    sendFile(usersChatIds.map(u => u.chatId)
+        .filter(c => c !== ctx.from.id))
+}
 
 module.exports = dashboardScene
