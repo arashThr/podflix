@@ -15,11 +15,13 @@ const mainMenuButtons = Markup.inlineKeyboard([
 const enterMenu = ctx => ctx.reply('Select', mainMenuButtons)
 userMenuScene.enter(enterMenu)
 userMenuScene.action('user-menu-reply', enterMenu)
-userMenuScene.action('user-menu', ctx =>
+userMenuScene.action('user-menu', async ctx => {
+    await ctx.answerCbQuery()
     ctx.editMessageText('Select', mainMenuButtons)
-)
+})
 
 userMenuScene.action('all-episodes', async ctx => {
+    await ctx.answerCbQuery()
     const episodes = await filesCollection()
         .find()
         .toArray()
@@ -34,8 +36,9 @@ userMenuScene.action('all-episodes', async ctx => {
     )
 })
 
-userMenuScene.action('exit-user-bot', ctx => {
-    ctx.editMessageText('Goddbyt. Press /start to start again')
+userMenuScene.action('exit-user-bot', async ctx => {
+    await ctx.answerCbQuery()
+    ctx.editMessageText('Goodbye. Press /start to start again')
     ctx.scene.leave()
 })
 

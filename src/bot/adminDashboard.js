@@ -33,6 +33,7 @@ dashboardScene.action('exit-dashboard', ctx => {
 })
 
 dashboardScene.action('show-files', async ctx => {
+    await ctx.answerCbQuery()
     const files = await filesCollection()
         .find()
         .toArray()
@@ -62,6 +63,7 @@ caption: ${fileInfo.caption}`,
 })
 
 dashboardScene.action('remove-file', async ctx => {
+    await ctx.answerCbQuery()
     const op = await filesCollection().deleteOne({
         epKey: ctx.session.epKey
     })
@@ -73,12 +75,14 @@ dashboardScene.action('remove-file', async ctx => {
     } else ctx.editMessageText('Removal failed', goHomeButton())
 })
 
-dashboardScene.action('add-file', ctx => {
+dashboardScene.action('add-file', async ctx => {
+    await ctx.answerCbQuery()
     ctx.session.dashboardState = dashboardState.SENDING_FILE
     ctx.editMessageText('Forward or Send file; Otherwise press back', goHomeButton())
 })
 
-dashboardScene.action('dashboard-main', ctx => {
+dashboardScene.action('dashboard-main', async ctx => {
+    await ctx.answerCbQuery()
     ctx.editMessageText('Select', menuKeyboard)
     ctx.session.dashboardState = dashboardState.MAIN_MENU
 })
