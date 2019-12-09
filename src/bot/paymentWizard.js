@@ -100,7 +100,8 @@ function getUserFrom(tgUser) {
         realName:
             [tgUser.first_name, tgUser.last_name].join(' ').trim() ||
             tgUser.username ||
-            'Unknown'
+            'Unknown',
+        paymentId: null
     }
 }
 

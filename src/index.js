@@ -1,4 +1,4 @@
-const { launchBot } = require('./userBot/userBot')
+const { launchBot } = require('./bot/botStarter')
 const { startListen } = require('./payment/paymentServers')
 const { initDb } = require('./db')
 

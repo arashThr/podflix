@@ -6,7 +6,7 @@ const configs = require('../configs')
 
 // Admin
 const loginScene = require('./loginScene')
-const dashboardScene = require('./dashboard')
+const dashboardScene = require('./adminDashboard')
 
 // User
 const paymentWizard = require('./paymentWizard')
@@ -41,17 +41,6 @@ bot.start(async ctx => {
 })
 
 exports.launchBot = function launchBot() {
-    // const secretPath =
-    //     '/' +
-    //     Math.random()
-    //         .toString(36)
-    //         .substring(2, 8)
-
-    // bot.telegram.setWebhook(configs.serverUrl + secretPath)
-    // bot.startWebhook(secretPath)
-    // require('http')
-    //     .createServer(bot.webhookCallback(secretPath))
-    //     .listen(configs.botPort)
     bot.launch()
     console.log('Bot started')
 }

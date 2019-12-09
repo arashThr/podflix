@@ -21,9 +21,8 @@ router.get(`${payPath}/:sessionId`, async (req, res) => {
 })
 
 router.get('/success', async (req, res) => {
-    let sessionId = req.query.session_id
+    const sessionId = req.query.session_id
     try {
-        sessionId = 'cs_test_Q3jVdbACP5LdhPEsRtzRfpSJjwIKljDqNPpLA8LEdkJckvqs7FAzU8tl'
         const session = await stripe.checkout.sessions.retrieve(sessionId)
         const sessionJSON = JSON.stringify(session, null, 2)
         res.render('stripe-success', {
