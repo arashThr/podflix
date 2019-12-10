@@ -12,6 +12,7 @@ const dashboardScene = require('./adminDashboard')
 const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
 const { usersCollection } = require('../db')
+const discountScene = require('./discounts')
 
 const bot = new Telegraf(configs.botToken)
 bot.use(session())
@@ -20,10 +21,12 @@ const stage = new Stage([
     loginScene,
     dashboardScene,
     paymentWizard,
-    userMenuScene
+    userMenuScene,
+    discountScene
 ])
 bot.use(stage.middleware())
 bot.command('login', enter('login'))
+bot.command('promo', enter('discount-scene'))
 
 bot.start(async ctx => {
     const tgUser = ctx.from

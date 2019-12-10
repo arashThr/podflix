@@ -27,5 +27,6 @@ module.exports = {
     filesCollection() { return db.collection('files') },
     rialPaymentsCollection() { return db.collection('irrPayments') },
     usdPaymentsCollection() { return db.collection('usdPayments') },
+    discountsCollection() { return db.collection('discounts') },
     close: () => client.close()
 }
