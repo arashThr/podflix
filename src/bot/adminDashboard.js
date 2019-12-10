@@ -1,7 +1,8 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
-const { filesCollection, usersCollection } = require('../db')
+const FileModel = require('../models/fileModel')
+const UserModel = require('../models/userModel')
 const Commons = require('../common')
 
 const dashboardScene = new Scene('dashboard')
@@ -34,9 +35,7 @@ dashboardScene.action('exit-dashboard', ctx => {
 
 dashboardScene.action('show-files', async ctx => {
     await ctx.answerCbQuery()
-    const files = await filesCollection()
-        .find()
-        .toArray()
+    const files = await FileModel.find()
     if (files.length === 0) {
         return ctx.editMessageText('No episode uploaded', goHomeButton())
     }
@@ -53,7 +52,7 @@ dashboardScene.hears(Commons.epNameRegex, async ctx => {
     const epKey = ctx.match[1]
     ctx.session.epKey = epKey
 
-    const fileInfo = await filesCollection().findOne({ epKey })
+    const fileInfo = await FileModel.findOne({ epKey })
     ctx.reply(
         `🗃
 name: ${fileInfo.name}
@@ -64,10 +63,10 @@ caption: ${fileInfo.caption}`,
 
 dashboardScene.action('remove-file', async ctx => {
     await ctx.answerCbQuery()
-    const op = await filesCollection().deleteOne({
+    const op = await FileModel.deleteOne({
         epKey: ctx.session.epKey
     })
-    if (op.result.ok) {
+    if (op.ok) {
         ctx.editMessageText(
             'File removed from collection',
             goHomeButton([Markup.callbackButton('Show files', 'show-files')])
@@ -112,13 +111,14 @@ dashboardScene.on('message', async ctx => {
         caption: ctx.message.caption || '',
         size: doc.file_size
     }
-    const op = await filesCollection().insertOne(fileInfo)
-    if (op.result.ok) {
+    const op = await FileModel.create(fileInfo)
+    if (!op.errors) {
         logger.info('File added')
         broadcastNewFile(ctx, fileInfo)
         ctx.reply('Send another or hit back', goHomeButton())
     } else {
-        logger.error('Adding file failed - DB error', fileInfo)
+        ctx.reply('Adding new file failed', goHomeButton())
+        logger.error('Adding file failed - DB error', { fileInfo, errors: op.errors })
     }
 })
 
@@ -126,10 +126,8 @@ dashboardScene.on('message', async ctx => {
 // BoardcastNewFile function takes care of this limitation
 // More info: https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this
 async function broadcastNewFile(ctx, fileInfo) {
-    const usersChatIds = await usersCollection()
-        .find()
-        .project({ chatId: 1, _id: 0 })
-        .toArray()
+    // Todo: Projection is not working
+    const usersChatIds = await UserModel.find({}, { chatId: 1 })
 
     function sendFile(chatIds, i = 0) {
         setTimeout(async () => {

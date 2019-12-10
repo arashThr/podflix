@@ -5,9 +5,10 @@ const redis = require('redis')
 const { getPaymentLink } = require('../payment/payping')
 const { getStripePaymentLink } = require('../payment/stripeRoute')
 const configs = require('../configs')
+const UserModel = require('../models/userModel')
 
 const logger = require('../logger')
-const { usersCollection, rialPaymentsCollection, usdPaymentsCollection } = require('../db')
+const { rialPaymentsCollection, usdPaymentsCollection } = require('../db')
 
 const paymentState = {
     requestedLink: 'requested',
@@ -141,9 +142,9 @@ async function fulfillPayment(link, ctx, moneyCollection, payId) {
         Markup.inlineKeyboard([Markup.urlButton('Pay', link)]).extra()
     )
     try {
-        const result = await waitForPayment(user, moneyCollection, payId)
+        const successful = await waitForPayment(user, moneyCollection, payId)
 
-        if (result.ok) {
+        if (successful) {
             ctx.editMessageText('Success')
             ctx.scene.enter('user-menu-scene')
         } else {
@@ -182,8 +183,12 @@ async function waitForPayment(user, moneyCollection, payId) {
     })
 
     user.paymentId = payId
-    const { result } = await usersCollection().insertOne(user)
-    return result
+    const result = await UserModel.create(user)
+    if (result.errors) {
+        logger.error('Error at user creation', result.errors)
+        return false
+    }
+    return true
 }
 
 module.exports = paymentWizard

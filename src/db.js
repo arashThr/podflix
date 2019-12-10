@@ -1,18 +1,18 @@
-const MongoClient = require('mongodb').MongoClient
+const mongoose = require('mongoose')
 const configs = require('./configs')
 const logger = require('./logger')
 
 let db = null
-let client = null
 async function initDb() {
     try {
         if (db) {
             logger.warn('Trying to init DB again!')
             return db
         }
-        const url = configs.mongoUrl
-        client = await MongoClient.connect(url, { useUnifiedTopology: true })
-        db = client.db(configs.dbName)
+        const mongoUrl = `${configs.mongoUrl}/${configs.dbName}`
+        await mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+        db = mongoose.connection
+        db.on('error', console.error.bind(console, 'MongoDB connection error:'))
         return db
     } catch (err) {
         logger.error(err)
@@ -23,10 +23,8 @@ async function initDb() {
 module.exports = {
     initDb,
     getDb() { return db },
-    usersCollection() { return db.collection('users') },
-    filesCollection() { return db.collection('files') },
     rialPaymentsCollection() { return db.collection('irrPayments') },
     usdPaymentsCollection() { return db.collection('usdPayments') },
     discountsCollection() { return db.collection('discounts') },
-    close: () => client.close()
+    close: () => db.close()
 }

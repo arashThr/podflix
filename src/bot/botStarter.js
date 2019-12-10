@@ -11,7 +11,7 @@ const dashboardScene = require('./adminDashboard')
 // User
 const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
-const { usersCollection } = require('../db')
+const UserModel = require('../models/userModel')
 const discountScene = require('./discounts')
 
 const bot = new Telegraf(configs.botToken)
@@ -32,7 +32,7 @@ bot.start(async ctx => {
     const tgUser = ctx.from
     if (tgUser.is_bot) return
 
-    const user = await usersCollection().findOne({ chatId: tgUser.id })
+    const user = await UserModel.findOne({ chatId: tgUser.id })
 
     if (user) {
         ctx.reply('Welcome back').then(() => ctx.scene.enter('user-menu-scene'))

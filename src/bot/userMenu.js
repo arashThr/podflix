@@ -1,7 +1,7 @@
 const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 
-const { filesCollection } = require('../db')
+const FileModel = require('../models/fileModel')
 const Commons = require('../common')
 
 const userMenuScene = new Scene('user-menu-scene')
@@ -22,9 +22,7 @@ userMenuScene.action('user-menu', async ctx => {
 
 userMenuScene.action('all-episodes', async ctx => {
     await ctx.answerCbQuery()
-    const episodes = await filesCollection()
-        .find()
-        .toArray()
+    const episodes = await FileModel.find()
     const text = episodes
         .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.name}\n\n`, '')
         .trim()
@@ -46,7 +44,7 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
     const epKey = ctx.match[1]
     ctx.session.epKey = epKey
 
-    const fileInfo = await filesCollection().findOne({ epKey })
+    const fileInfo = await FileModel.findOne({ epKey })
     try {
         ctx.replyWithDocument(
             fileInfo.fileId,
