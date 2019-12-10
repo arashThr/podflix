@@ -35,12 +35,21 @@ async function applyDiscount(chatId, code) {
         if (!discount) {
             return false
         }
+        if (await isExceedingAvailableCodes(discount)) {
+            return false
+        }
         console.log('DIS: ', discount)
         return discount
     } catch (e) {
         logger.error('Proccessing discount file failed', e)
         return false
     }
+}
+
+async function isExceedingAvailableCodes(discount) {
+    if (discount.times === '*') return false
+    const times = await DiscountModel.count({ code: discount.code })
+    return times > discount.times
 }
 
 function readPromoCodes() {
@@ -67,4 +76,5 @@ function readPromoCodes() {
     return discounts
 }
 
+module.exports = discountScene
 module.exports = discountScene
