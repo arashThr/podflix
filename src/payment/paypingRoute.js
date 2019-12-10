@@ -28,7 +28,7 @@ router.get(configs.payping.returnPath, async (req, res) => {
         new ObjectId(clientRefId)
     )
 
-    const verified = await verifyPayment(payment.price, refId)
+    const verified = await verifyPayment(payment.amount, refId)
 
     pub.publish(
         'payment-verify',

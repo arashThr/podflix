@@ -60,12 +60,12 @@ paymentDecisonStep.action('buy', ctx => {
 
 const sendPaymentLinkStep = new Composer()
 sendPaymentLinkStep.action('iran', async ctx => {
-    const price = configs.app.price
+    const amount = configs.app.price
     const chatId = ctx.from.id
-    const payment = await irrPaymentModel.create({ price, chatId })
+    const payment = await irrPaymentModel.create({ amount, chatId })
 
     const link = await getPaymentLink({
-        amount: price,
+        amount,
         clientRefId: payment._id.toString(),
         payerIdentity: chatId
     })
@@ -73,13 +73,13 @@ sendPaymentLinkStep.action('iran', async ctx => {
     await fulfillPayment(link, ctx, irrPaymentModel, payment._id)
 })
 sendPaymentLinkStep.action('tg-payment', async ctx => {
-    const price = configs.app.usdPrice
+    const amount = configs.app.usdPrice
     const payment = await usdPaymentModel.create({
-        price,
+        amount,
         chatId: ctx.from.id
     })
     const link = await getStripePaymentLink({
-        amount: price,
+        amount: amount,
         clientRefId: payment._id.toString()
     })
     logger.debug('Stripe payment link: ' + link)

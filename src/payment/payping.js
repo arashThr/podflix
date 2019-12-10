@@ -32,9 +32,9 @@ async function getPaymentLink(payload) {
     return null
 }
 
-async function verifyPayment(price, refId) {
+async function verifyPayment(amount, refId) {
     const verifyBody = JSON.stringify({
-        amount: price,
+        amount,
         refId: refId
     })
     const resp = await fetch(`${configs.payping.server}/v1/pay/verify`, {

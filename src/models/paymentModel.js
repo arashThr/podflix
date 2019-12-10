@@ -20,7 +20,7 @@ const paymentSchema = new mongoose.Schema(
             default: 'requested'
         },
         chatId: Number,
-        price: Number,
+        amount: Number,
         refId: String
     },
     { discriminatorKey: 'currency' }
