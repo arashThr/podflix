@@ -23,8 +23,6 @@ async function initDb() {
 module.exports = {
     initDb,
     getDb() { return db },
-    rialPaymentsCollection() { return db.collection('irrPayments') },
-    usdPaymentsCollection() { return db.collection('usdPayments') },
     discountsCollection() { return db.collection('discounts') },
     close: () => db.close()
 }

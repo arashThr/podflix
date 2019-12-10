@@ -8,13 +8,7 @@ const configs = require('../configs')
 const UserModel = require('../models/userModel')
 
 const logger = require('../logger')
-const { rialPaymentsCollection, usdPaymentsCollection } = require('../db')
-
-const paymentState = {
-    requestedLink: 'requested',
-    canceled: 'canceled',
-    successful: 'success'
-}
+const { irrPaymentModel, usdPaymentModel, paymentState } = require('../models/paymentModel')
 
 const sub = redis.createClient(configs.redisUrl)
 sub.on('message', (channel, message) => {
@@ -67,31 +61,29 @@ paymentDecisonStep.action('buy', ctx => {
 const sendPaymentLinkStep = new Composer()
 sendPaymentLinkStep.action('iran', async ctx => {
     const price = configs.app.price
-    const user = getUserFrom(ctx.from)
-    const payId = await initPay(rialPaymentsCollection(), user, price)
+    const chatId = ctx.from.id
+    const payment = await irrPaymentModel.create({ price, chatId })
 
     const link = await getPaymentLink({
         amount: price,
-        clientRefId: payId.toString(),
-        payerIdentity: user.chatId,
-        payerName: user.realName
+        clientRefId: payment._id.toString(),
+        payerIdentity: chatId
     })
 
-    await fulfillPayment(link, ctx, rialPaymentsCollection(), payId)
+    await fulfillPayment(link, ctx, irrPaymentModel, payment._id)
 })
 sendPaymentLinkStep.action('tg-payment', async ctx => {
     const price = configs.app.usdPrice
-    const user = getUserFrom(ctx.from)
-    const payId = await initPay(usdPaymentsCollection(), user, price)
-
+    const payment = await usdPaymentModel.create({
+        price,
+        chatId: ctx.from.id
+    })
     const link = await getStripePaymentLink({
         amount: price,
-        clientRefId: payId.toString()
+        clientRefId: payment._id.toString()
     })
-
     logger.debug('Stripe payment link: ' + link)
-
-    await fulfillPayment(link, ctx, rialPaymentsCollection(), payId)
+    await fulfillPayment(link, ctx, usdPaymentModel, payment._id)
 })
 
 function getUserFrom(tgUser) {
@@ -113,20 +105,7 @@ const paymentWizard = new WizardScene(
     sendPaymentLinkStep
 )
 
-async function initPay(moneyCollection, user, price) {
-    const payment = {
-        created: new Date(),
-        updated: new Date(),
-        status: paymentState.requestedLink,
-        user,
-        price
-    }
-    const payRes = await moneyCollection.insertOne(payment)
-    const payId = payRes.insertedId
-    return payId
-}
-
-async function fulfillPayment(link, ctx, moneyCollection, payId) {
+async function fulfillPayment(link, ctx, paymentModel, payId) {
     const user = getUserFrom(ctx.from)
 
     if (!link) {
@@ -142,7 +121,7 @@ async function fulfillPayment(link, ctx, moneyCollection, payId) {
         Markup.inlineKeyboard([Markup.urlButton('Pay', link)]).extra()
     )
     try {
-        const successful = await waitForPayment(user, moneyCollection, payId)
+        const successful = await waitForPayment(user, paymentModel, payId)
 
         if (successful) {
             ctx.editMessageText('Success')
@@ -154,7 +133,7 @@ async function fulfillPayment(link, ctx, moneyCollection, payId) {
     } catch (e) {
         logger.error('Payment canceled ... ', user, e)
         ctx.editMessageText('Payment canceled. Please try again or contact us')
-        moneyCollection.updateOne({ _id: payId }, {
+        paymentModel.updateOne({ _id: payId }, {
             $set: {
                 updated: new Date(),
                 status: paymentState.canceled
@@ -165,16 +144,14 @@ async function fulfillPayment(link, ctx, moneyCollection, payId) {
     }
 }
 
-async function waitForPayment(user, moneyCollection, payId) {
+async function waitForPayment(user, paymentModel, payId) {
     const paymentPromise = new Promise((resolve, reject) => {
         payments.set(String(payId), { resolve, reject })
     })
-
     const refId = await paymentPromise
-
     logger.debug('Payment resolved with ref id of: ' + refId)
 
-    await moneyCollection.updateOne({ _id: payId }, {
+    await paymentModel.updateOne({ _id: payId }, {
         $set: {
             refId,
             updated: new Date(),

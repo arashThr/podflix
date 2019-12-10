@@ -3,7 +3,8 @@ const fetch = require('node-fetch')
 const querystring = require('querystring')
 const express = require('express')
 const { getPaymentLink } = require('../payment/payping')
-const { initDb, rialPaymentsCollection } = require('../db')
+const { initDb } = require('../db')
+const { irrPaymentModel } = require('../models/paymentModel')
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
@@ -43,7 +44,7 @@ route.get('/v1/pay/gotoipg/*', async (req, res) => {
 async function simulatePaymentProcess() {
     await initDb()
     const price = 100
-    const op = await rialPaymentsCollection().insertOne({
+    const op = await irrPaymentModel.insertOne({
         created: new Date(),
         updated: new Date(),
         status: 'req',
@@ -78,8 +79,8 @@ async function simulatePaymentProcess() {
         method: 'GET'
     })
     console.log('Status of return URL: ', resp.status)
-    const delOp = await rialPaymentsCollection().deleteOne({ _id: op.insertedId })
-    if (delOp.result.ok) console.log('Fake pay removed')
+    const delOp = await irrPaymentModel.deleteOne({ _id: op.insertedId })
+    if (delOp.ok) console.log('Fake pay removed')
     else console.error('Fake pay remove failed')
 }
 

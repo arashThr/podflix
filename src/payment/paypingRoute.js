@@ -2,7 +2,7 @@ const express = require('express')
 const redis = require('redis')
 const logger = require('../logger')
 const configs = require('../configs')
-const { rialPaymentsCollection } = require('../db')
+const { irrPaymentModel } = require('../models/paymentModel')
 const { ObjectId } = require('mongodb')
 const { verifyPayment } = require('./payping')
 
@@ -24,7 +24,7 @@ router.get(configs.payping.returnPath, async (req, res) => {
     }
     res.sendStatus(200)
 
-    const payment = await rialPaymentsCollection().findOne(
+    const payment = await irrPaymentModel.findOne(
         new ObjectId(clientRefId)
     )
 
