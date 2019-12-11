@@ -9,7 +9,7 @@ const { getStripePaymentLink } = require('./stripeRoute')
 const { findDiscountFor, savePaymentDiscountFor } = require('./discounts')
 const { irrPaymentModel, usdPaymentModel, paymentState } = require('../models/paymentModel')
 
-const UserModel = require('../models/userModel')
+const { PayedUserModel } = require('../models/userModel')
 
 const paymentWaitList = new Map()
 const usersPaymentsDocs = new Map()
@@ -80,7 +80,7 @@ async function waitForPay(user, paymentModel) {
         })
 
         user.paymentId = payId
-        await UserModel.create(user)
+        await PayedUserModel.create(user)
 
         return true
     } catch (error) {

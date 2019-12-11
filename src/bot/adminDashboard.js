@@ -2,7 +2,7 @@ const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
 const FileModel = require('../models/fileModel')
-const UserModel = require('../models/userModel')
+const { PayedUserModel } = require('../models/userModel')
 const Commons = require('../common')
 
 const dashboardScene = new Scene('dashboard')
@@ -127,7 +127,7 @@ dashboardScene.on('message', async ctx => {
 // More info: https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this
 async function broadcastNewFile(ctx, fileInfo) {
     // Todo: Projection is not working
-    const usersChatIds = await UserModel.find({}, { chatId: 1 })
+    const usersChatIds = await PayedUserModel.find({}, { chatId: 1 })
 
     function sendFile(chatIds, i = 0) {
         setTimeout(async () => {

@@ -4,27 +4,41 @@ const path = require('path')
 
 const logger = require('../logger')
 const DiscountModel = require('../models/discountModel')
+const { FreeUserModel } = require('../models/userModel')
 
 async function applyDiscount(chatId, code) {
     const alreadyApplied = await discountsCollection().findOne({ chatId })
-    if (alreadyApplied) {
-        // Todo: Reply with already applied
-        return false
-    }
+    if (alreadyApplied) return { reason: 'code alreay applied' }
     try {
         const discounts = readPromoCodes()
         const discount = discounts.find(d => d.code === code)
         if (!discount) {
-            return false
+            return { reason: 'code does not exist' }
         }
         if (await isExceedingAvailableCodes(discount)) {
-            return false
+            return { reason: 'code is no longer' }
         }
-        return await saveDiscountForUser(discount, chatId)
+        const result = await saveDiscountForUser(discount, chatId)
+        return {
+            discountId: result._id, isFree: isFreeAccessCode(discount)
+        }
     } catch (err) {
         logger.error('Proccessing discount file failed', { err })
-        return false
+        return { reason: 'code: Error occured' }
     }
+}
+
+async function addFreeUser(user, discountId) {
+    user.discountId = discountId
+    await FreeUserModel.create(user)
+}
+
+function isFreeAccessCode(discount) {
+    if (discount.dollarPrice !== 0) return false
+    if (discount.toomanPrice !== 0) {
+        throw new Error('Promo code error: They both must be zero')
+    }
+    return true
 }
 
 async function saveDiscountForUser(discount, chatId) {
@@ -86,5 +100,6 @@ function findDiscountFor(chatId) {
 module.exports = {
     applyDiscount,
     savePaymentDiscountFor,
-    findDiscountFor
+    findDiscountFor,
+    addFreeUser
 }

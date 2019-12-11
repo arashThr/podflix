@@ -11,8 +11,8 @@ const dashboardScene = require('./adminDashboard')
 // User
 const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
-const UserModel = require('../models/userModel')
 const discountScene = require('./discountScene')
+const { UserModel } = require('../models/userModel')
 
 const bot = new Telegraf(configs.botToken)
 bot.use(session())

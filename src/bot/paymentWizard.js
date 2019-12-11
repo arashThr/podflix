@@ -3,6 +3,7 @@ const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
 
 const configs = require('../configs')
+const Commons = require('../common')
 
 const {
     createPaypinPayment,
@@ -44,7 +45,7 @@ sendPaymentLinkStep.action('tg-payment', async ctx => {
 })
 
 async function paymentProcess(ctx, createPayment, waitForPay) {
-    const user = getUserFrom(ctx.from)
+    const user = Commons.getUserFrom(ctx.from)
     const link = await createPayment(user.chatId)
 
     if (!link) {
@@ -65,18 +66,6 @@ async function paymentProcess(ctx, createPayment, waitForPay) {
     } else {
         ctx.editMessageText('Payment canceled. Please try again or contact us')
         ctx.scene.enter('payment-wizard')
-    }
-}
-
-function getUserFrom(tgUser) {
-    return {
-        chatId: tgUser.id,
-        userName: tgUser.username,
-        realName:
-            [tgUser.first_name, tgUser.last_name].join(' ').trim() ||
-            tgUser.username ||
-            'Unknown',
-        paymentId: null
     }
 }
 
