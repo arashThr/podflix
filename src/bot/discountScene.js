@@ -10,14 +10,15 @@ discountScene.enter(async ctx => {
 discountScene.on('text', async ctx => {
     const code = ctx.message.text
     const chatId = ctx.from.id
-    const discount = await applyDiscount(chatId, code)
-    if (discount) {
-        ctx.session.discount = discount
+    const applied = await applyDiscount(chatId, code)
+    if (applied) {
+        ctx.session.discount = applied
         ctx.reply('Code applied')
+        ctx.scene.enter('payment-wizard')
     } else {
-        ctx.reply('Code used or unavailable')
+        ctx.reply('Code used or unavailable. Press /start')
+        ctx.scene.leave()
     }
-    ctx.scene.enter('payment-wizard')
 })
 
 module.exports = discountScene

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { ObjectId } = require('mongodb')
+const ObjectId = mongoose.Schema.Types.ObjectId
 
 const userSchema = new mongoose.Schema({
     chatId: Number,

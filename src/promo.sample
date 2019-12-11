@@ -1,5 +1,9 @@
 # Promo codes
-# Precentage(1% to 100%) + Times(number or * for infinit) + Code(4 to 10 alphanumeric characters)
 
-100% 1 gift_code
-20% * newYear
+# Dollar value(500$, which is 5 dollars) +
+# Tooman value(100T, which is 1000 rials) +
+# Times(Number or * for infinit) +
+# Code(4 to 20 alphanumeric characters)
+
+250$ 100T 1 gift_code
+0$ 0T * newYear

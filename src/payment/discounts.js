@@ -3,10 +3,12 @@ const fs = require('fs')
 const path = require('path')
 
 const logger = require('../logger')
+const DiscountModel = require('../models/discountModel')
 
 async function applyDiscount(chatId, code) {
     const alreadyApplied = await discountsCollection().findOne({ chatId })
     if (alreadyApplied) {
+        // Todo: Reply with already applied
         return false
     }
     try {
@@ -18,12 +20,27 @@ async function applyDiscount(chatId, code) {
         if (await isExceedingAvailableCodes(discount)) {
             return false
         }
-        console.log('DIS: ', discount)
-        return discount
-    } catch (e) {
-        logger.error('Proccessing discount file failed', e)
+        return await saveDiscountForUser(discount, chatId)
+    } catch (err) {
+        logger.error('Proccessing discount file failed', { err })
         return false
     }
+}
+
+async function saveDiscountForUser(discount, chatId) {
+    const result = await DiscountModel.create({
+        chatId,
+        code: discount.code,
+        dollarPrice: discount.dollarPrice,
+        toomanPrice: discount.toomanPrice
+    })
+    return result._id
+}
+
+async function isExceedingAvailableCodes(discount) {
+    if (discount.times === '*') return false
+    const times = await DiscountModel.countDocuments({ code: discount.code })
+    return times >= Number(discount.times)
 }
 
 function readPromoCodes() {
@@ -37,17 +54,37 @@ function readPromoCodes() {
         if (l.startsWith('#') || l === '') {
             continue
         }
-        const pat = /^(\d{1,3})%\s(\d+|\*)\s(\w{4,10})$/g
+        const pat = /^(?<dollar>\d{1,4})\$\s(?<tooman>\d{1,5})T\s(?<times>\d{1,5}|\*)\s(?<code>\w{4,20})$/g
         const result = pat.exec(l)
         if (result) {
             discounts.push({
-                precentage: result[1],
-                times: result[2],
-                code: result[3]
+                dollarPrice: Number(result.groups.dollar),
+                toomanPrice: Number(result.groups.tooman),
+                times: result.groups.times,
+                code: result.groups.code
             })
         }
     }
     return discounts
 }
 
-exports.applyDiscount = applyDiscount
+async function savePaymentDiscountFor(chatId, payId) {
+    return DiscountModel.updateOne(
+        { chatId },
+        {
+            $set: {
+                payId
+            }
+        }
+    )
+}
+
+function findDiscountFor(chatId) {
+    return DiscountModel.findOne({ chatId })
+}
+
+module.exports = {
+    applyDiscount,
+    savePaymentDiscountFor,
+    findDiscountFor
+}
