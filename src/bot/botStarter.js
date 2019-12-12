@@ -2,7 +2,10 @@ const Telegraf = require('telegraf')
 const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
 const { enter } = Stage
+
 const configs = require('../configs')
+const i18n = require('i18n')
+const { i18nInit } = require('./localization')
 
 // Admin
 const loginScene = require('./loginScene')
@@ -35,15 +38,16 @@ bot.start(async ctx => {
     const user = await UserModel.findOne({ chatId: tgUser.id })
 
     if (user) {
-        ctx.reply('Welcome back').then(() => ctx.scene.enter('user-menu-scene'))
+        ctx.reply(__('start.welcome-back')).then(() => ctx.scene.enter('user-menu-scene'))
     } else {
-        ctx.reply('You are unknown').then(() =>
+        ctx.reply(__('start.unknown-user')).then(() =>
             ctx.scene.enter('payment-wizard')
         )
     }
 })
 
 exports.launchBot = function launchBot() {
+    i18nInit()
     bot.launch()
     console.log('Bot started')
 }

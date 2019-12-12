@@ -8,11 +8,10 @@ const userMenuScene = new Scene('user-menu-scene')
 
 const mainMenuButtons = Markup.inlineKeyboard([
     Markup.callbackButton('Show All', 'all-episodes'),
-    Markup.callbackButton('Get next', 'next-episode'),
     Markup.callbackButton('Exit', 'exit-user-bot')
 ]).extra()
 
-const enterMenu = ctx => ctx.reply('Select', mainMenuButtons)
+const enterMenu = ctx => ctx.reply(__('user-menu.main-select'), mainMenuButtons)
 userMenuScene.enter(enterMenu)
 userMenuScene.action('user-menu-reply', enterMenu)
 userMenuScene.action('user-menu', async ctx => {
@@ -23,11 +22,11 @@ userMenuScene.action('user-menu', async ctx => {
 userMenuScene.action('all-episodes', async ctx => {
     await ctx.answerCbQuery()
     const episodes = await FileModel.find()
-    const text = episodes
+    const list = episodes
         .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.name}\n\n`, '')
         .trim()
     ctx.editMessageText(
-        'Here are the episodes\n' + text,
+        __('user-menu.episodes-list', list),
         Markup.inlineKeyboard([
             Markup.callbackButton('Get home', 'user-menu')
         ]).extra()
@@ -36,7 +35,7 @@ userMenuScene.action('all-episodes', async ctx => {
 
 userMenuScene.action('exit-user-bot', async ctx => {
     await ctx.answerCbQuery()
-    ctx.editMessageText('Goodbye. Press /start to start again')
+    ctx.editMessageText(__('user-menu.user-exit'))
     ctx.scene.leave()
 })
 
@@ -51,12 +50,12 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
             {
                 caption: fileInfo.caption,
                 reply_markup: Markup.inlineKeyboard([
-                    Markup.callbackButton('Get home', 'user-menu-reply')
+                    Markup.callbackButton(__('user-menu.go-home'), 'user-menu-reply')
                 ])
             }
         )
     } catch (e) {
-        ctx.reply('Error occured')
+        ctx.reply(__('user-menu.ep-fetch-error'))
         console.error(e)
     }
 })

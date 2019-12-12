@@ -14,10 +14,10 @@ const {
 
 const selectBuyStep = ctx => {
     ctx.reply(
-        'Episode descriptions',
+        __('pay.buy-collection'),
         Markup.inlineKeyboard([
-            Markup.callbackButton('Buy', 'buy'),
-            Markup.urlButton('Visit site', configs.serverUrl)
+            Markup.callbackButton(__('pay.buy-btn'), 'buy'),
+            Markup.urlButton(__('pay.visit-site-btn'), configs.serverUrl)
         ]).extra()
     )
     return ctx.wizard.next()
@@ -26,10 +26,10 @@ const selectBuyStep = ctx => {
 const paymentDecisonStep = new Composer()
 paymentDecisonStep.action('buy', ctx => {
     ctx.editMessageText(
-        'Are you in Iran?',
+        __('pay.pay-method'),
         Markup.inlineKeyboard([
-            Markup.callbackButton('Yes', 'iran'),
-            Markup.callbackButton('No', 'tg-payment')
+            Markup.callbackButton(__('pay.iran-pay'), 'iran'),
+            Markup.callbackButton(__('pay.stripe'), 'tg-payment')
         ]).extra()
     )
     return ctx.wizard.next()
@@ -49,22 +49,22 @@ async function paymentProcess(ctx, createPayment, waitForPay) {
     const link = await createPayment(user.chatId)
 
     if (!link) {
-        ctx.editMessageText('Getting payment link failed. Try again /start')
+        ctx.editMessageText(__('pay.link-failed'))
         ctx.scene.leave()
         return
     }
     await ctx.editMessageText(
-        'Click to pay',
-        Markup.inlineKeyboard([Markup.urlButton('Pay', link)]).extra()
+        __('pay.click-to-pay'),
+        Markup.inlineKeyboard([Markup.urlButton(__('pay.pay-btn'), link)]).extra()
     )
 
     const success = await waitForPay(user)
 
     if (success) {
-        ctx.editMessageText('Success')
+        ctx.editMessageText(__('pay.success'))
         ctx.scene.enter('user-menu-scene')
     } else {
-        ctx.editMessageText('Payment canceled. Please try again or contact us')
+        ctx.editMessageText(__('pay.canceled'))
         ctx.scene.enter('payment-wizard')
     }
 }

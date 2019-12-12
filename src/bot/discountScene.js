@@ -5,7 +5,7 @@ const { applyDiscount, addFreeUser } = require('../payment/discounts')
 const discountScene = new Scene('discount-scene')
 
 discountScene.enter(async ctx => {
-    await ctx.reply('Enter code:')
+    await ctx.reply(__('discount.enter-code'))
 })
 
 discountScene.on('text', async ctx => {
@@ -13,7 +13,7 @@ discountScene.on('text', async ctx => {
     const chatId = ctx.from.id
     const result = await applyDiscount(chatId, code)
     if (result.discountId) {
-        ctx.reply('Code applied')
+        ctx.reply(__('discount.applied'))
         if (result.isFree) {
             const user = Commons.getUserFrom(ctx.from)
             await addFreeUser(user, result.discountId)
@@ -22,7 +22,7 @@ discountScene.on('text', async ctx => {
             ctx.scene.enter('payment-wizard')
         }
     } else {
-        ctx.reply(result.reason + 'Press /start')
+        ctx.reply(__('discount.failed', result.reason))
         ctx.scene.leave()
     }
 })

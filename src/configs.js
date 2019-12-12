@@ -7,6 +7,7 @@ if (result.error) {
 }
 
 const configs = {
+    botLang: process.env.BOT_LANG || 'en',
     listenerPort: 3000,
     serverUrl: process.env.SERVER_URL,
     isInDev: (process.env.NODE_ENV || 'development') === 'development',

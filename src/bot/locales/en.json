@@ -1,0 +1,31 @@
+{
+  "discount": {
+    "applied": "Code applied",
+    "enter-code": "Enter code:",
+    "failed": "Discount failed: %s\nPress /start"
+  },
+  "pay": {
+    "buy-btn": "Buy btton",
+    "buy-collection": "Press buy to pay for this collection",
+    "canceled": "Payment canceled. Please try again or contact us",
+    "click-to-pay": "Click to pay",
+    "iran-pay": "Yes",
+    "link-failed": "Getting payment link failed. Try again /start",
+    "pay-btn": "Pay",
+    "pay-method": "Are you in Iran?",
+    "stripe": "No",
+    "success": "Success",
+    "visit-site-btn": "Visit site"
+  },
+  "start": {
+    "unknown-user": "You are unknown",
+    "welcome-back": "Welcome back"
+  },
+  "user-menu": {
+    "ep-fetch-error": "Error occured",
+    "episodes-list": "Here are the episodes %s \\n",
+    "go-home": "Get home",
+    "main-select": "Select",
+    "user-exit": "Goodbye. Press /start to start again"
+  }
+}
