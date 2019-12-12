@@ -8,7 +8,7 @@ if (result.error) {
 
 const configs = {
     botLang: process.env.BOT_LANG || 'en',
-    listenerPort: 3000,
+    httpPort: 3000, // Port for internal HTTP server
     serverUrl: process.env.SERVER_URL,
     isInDev: (process.env.NODE_ENV || 'development') === 'development',
     logLevel: process.env.LOG_LEVEL || 'info',
@@ -22,13 +22,14 @@ const configs = {
         disableLoginWithPass: false
     },
     botToken: process.env.BOT_TOKEN,
-    botPort: process.env.BOT_PORT || 8443,
 
     app: {
         toomanPrice: process.env.APP_PRICE || 100,
         dollarPrice: 500
     }
 }
+
+configs.serverPort = configs.isInDev ? 443 : 8443 // ngrok vs production
 
 configs.payping = {
     server: process.env.PAYPING_SERVER || 'https://api.payping.ir',
