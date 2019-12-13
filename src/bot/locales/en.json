@@ -24,8 +24,10 @@
   "user-menu": {
     "ep-fetch-error": "Error occured",
     "episodes-list": "Here are the episodes %s \\n",
-    "go-home": "Get home",
+    "go-home-btn": "Get home",
     "main-select": "Select",
-    "user-exit": "Goodbye. Press /start to start again"
+    "user-exit": "Goodbye. Press /start to start again",
+    "show-episodes-btn": "Show All",
+    "exit-btn": "Exit"
   }
 }

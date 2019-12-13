@@ -7,8 +7,8 @@ const Commons = require('../common')
 const userMenuScene = new Scene('user-menu-scene')
 
 const mainMenuButtons = Markup.inlineKeyboard([
-    Markup.callbackButton('Show All', 'all-episodes'),
-    Markup.callbackButton('Exit', 'exit-user-bot')
+    Markup.callbackButton(__('user-menu.show-episodes-btn'), 'all-episodes'),
+    Markup.callbackButton(__('user-menu.exit-btn'), 'exit-user-bot')
 ]).extra()
 
 const enterMenu = ctx => ctx.reply(__('user-menu.main-select'), mainMenuButtons)
@@ -28,7 +28,7 @@ userMenuScene.action('all-episodes', async ctx => {
     ctx.editMessageText(
         __('user-menu.episodes-list', list),
         Markup.inlineKeyboard([
-            Markup.callbackButton('Get home', 'user-menu')
+            Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
         ]).extra()
     )
 })
@@ -50,7 +50,7 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
             {
                 caption: fileInfo.caption,
                 reply_markup: Markup.inlineKeyboard([
-                    Markup.callbackButton(__('user-menu.go-home'), 'user-menu-reply')
+                    Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu-reply')
                 ])
             }
         )
