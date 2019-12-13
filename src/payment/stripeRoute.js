@@ -11,7 +11,7 @@ const router = express.Router()
 // Webhook path to be set on stripe is ${route}/${webhookPath}
 const webhookPath = '/paysuccess'
 const payPath = '/pay'
-const stripePath = `${configs.serverUrl}:${configs.serverPort}${configs.stripe.route}`
+const stripePath = `${configs.serverUrl}${configs.stripe.route}`
 
 router.get(`${payPath}/:sessionId`, async (req, res) => {
     const sessionId = req.params.sessionId
