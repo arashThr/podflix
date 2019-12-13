@@ -37,7 +37,7 @@ route.get('/v1/pay/gotoipg/*', async (req, res) => {
         clientrefid: payId
     })
 
-    const url = `${configs.serverUrl}/${configs.payping.route}/${configs.payping.returnPath}/?` + qs
+    const url = `${configs.serverUrl}:${configs.serverPort}/${configs.payping.route}/${configs.payping.returnPath}/?` + qs
     res.redirect(url)
 })
 
@@ -73,7 +73,7 @@ async function simulatePaymentProcess() {
         clientrefid: clientRefId
     })
 
-    const url = `${configs.serverUrl}${configs.payping.route}${configs.payping.returnPath}/?${qs}`
+    const url = `${configs.serverUrl}:${configs.serverPort}${configs.payping.route}${configs.payping.returnPath}/?${qs}`
     console.log('URL: ', url)
     const resp = await fetch(url, {
         method: 'GET'

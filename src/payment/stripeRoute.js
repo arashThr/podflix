@@ -11,6 +11,7 @@ const router = express.Router()
 // Webhook path to be set on stripe is ${route}/${webhookPath}
 const webhookPath = '/paysuccess'
 const payPath = '/pay'
+const stripePath = `${configs.serverUrl}:${configs.serverPort}${configs.stripe.route}`
 
 router.get(`${payPath}/:sessionId`, async (req, res) => {
     const sessionId = req.params.sessionId
@@ -82,15 +83,15 @@ async function getStripeSessionId(amount, clientRefId) {
                 quantity: 1
             }
         ],
-        success_url: `${configs.serverUrl}${configs.stripe.route}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${configs.serverUrl}${configs.stripe.route}/canceled?clientRefId=${clientRefId}`
+        success_url: `${stripePath}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${stripePath}/canceled?clientRefId=${clientRefId}`
     })
     return session.id
 }
 
 async function getStripePaymentLink({ amount, clientRefId }) {
     const sessionId = await getStripeSessionId(amount, clientRefId)
-    const link = `${configs.serverUrl}${configs.stripe.route}${payPath}/${sessionId}`
+    const link = `${stripePath}${payPath}/${sessionId}`
     return link
 }
 
