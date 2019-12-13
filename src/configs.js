@@ -1,4 +1,6 @@
 const dotenv = require('dotenv')
+const i18n = require('i18n')
+const path = require('path')
 const result = dotenv.config()
 
 if (result.error) {
@@ -43,5 +45,13 @@ configs.stripe = {
     public: process.env.STRIPE_PUBLIC,
     route: '/stripe'
 }
+
+i18n.configure({
+    directory: path.join(__dirname, 'locales'),
+    objectNotation: true,
+    register: global
+})
+
+i18n.setLocale(configs.botLang)
 
 module.exports = configs

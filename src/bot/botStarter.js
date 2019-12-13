@@ -3,7 +3,6 @@ const Stage = require('telegraf/stage')
 const { enter } = Stage
 
 const configs = require('../configs')
-const { i18nInit } = require('./localization')
 
 // Admin
 const loginScene = require('./loginScene')
@@ -19,8 +18,6 @@ const { UserModel } = require('../models/userModel')
 // https://github.com/telegraf/telegraf/issues/320
 
 function initBot(bot) {
-    i18nInit()
-
     const stage = new Stage([
         loginScene,
         dashboardScene,
