@@ -39,9 +39,9 @@ sendPaymentLinkStep.action('tg-payment', async ctx => {
     )
 })
 
-const returnToPaymentOptions = new Composer()
-returnToPaymentOptions.action('reenter-payment', ctx => {
-    ctx.scene.reenter()
+sendPaymentLinkStep.action('return-home', async ctx => {
+    ctx.editMessageText(__('pay.return-home'))
+    return ctx.scene.leave()
 })
 
 async function paymentProcess(ctx, createPayment, priceString) {
@@ -62,6 +62,11 @@ async function paymentProcess(ctx, createPayment, priceString) {
         ]).extra()
     )
 }
+
+const returnToPaymentOptions = new Composer()
+returnToPaymentOptions.action('reenter-payment', ctx => {
+    showPaymentOptions(ctx.editMessageText)
+})
 
 const paymentWizard = new WizardScene(
     'payment-wizard',
