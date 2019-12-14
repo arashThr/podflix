@@ -28,10 +28,8 @@ const configs = {
     botToken: process.env.BOT_TOKEN,
 
     app: {
-        toomanPrice: process.env.APP_PRICE || 100,
-        toomanString: '۲۹٫۰۰۰ تومان',
-        dollarPrice: 500,
-        dollarString: '۵٫۹۹ دلار'
+        toomanPrice: process.env.TOOMAN_PRICE || 29000,
+        dollarPrice: process.env.DOLLAR_PRICE || 599
     }
 }
 
