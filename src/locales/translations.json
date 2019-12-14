@@ -1,0 +1,37 @@
+{
+  "discount": {
+    "applied": "Code applied",
+    "enter-code": "Enter code:",
+    "failed": "Discount failed: %s\nPress /start"
+  },
+  "pay": {
+    "canceled": "Canceled",
+    "failed": "Failed",
+    "pay-btn": "go to pay",
+    "pay-method": "Are you in Iran?",
+    "payment-desc": "Click to pay with payping",
+    "payping-btn": "Yes",
+    "return-home-btn": "Return",
+    "return-to-payment-btn": "Return",
+    "stripe-btn": "No!",
+    "success": "Success"
+  },
+  "start": {
+    "about": "About us",
+    "about-btn": "about the project",
+    "buy-btn": "buy",
+    "creators-btn": "creators",
+    "ep0-btn": "listen to ep 0",
+    "teaser": "Teaser",
+    "teaser-btn": "Teaser",
+    "unknown-user": "You are unknown",
+    "welcome-back": "Welcome back"
+  },
+  "user-menu": {
+    "ep-fetch-error": "Error occured",
+    "episodes-list": "Here are the episodes %s",
+    "go-home": "Get home",
+    "main-select": "Select",
+    "user-exit": "Goodbye. Press /start to start again"
+  }
+}

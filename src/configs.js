@@ -48,11 +48,12 @@ configs.stripe = {
 }
 
 i18n.configure({
+    locales: ['translations', 'translations_fa'],
     directory: path.join(__dirname, 'locales'),
     objectNotation: true,
     register: global
 })
 
-i18n.setLocale(configs.botLang)
+i18n.setLocale(configs.botLang === 'en' ? 'translations' : 'translations_fa')
 
 module.exports = configs
