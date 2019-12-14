@@ -6,36 +6,38 @@ const Commons = require('../common')
 
 const userMenuScene = new Scene('user-menu-scene')
 
-const mainMenuButtons = Markup.inlineKeyboard([
-    Markup.callbackButton(__('user-menu.show-episodes-btn'), 'all-episodes'),
-    Markup.callbackButton(__('user-menu.exit-btn'), 'exit-user-bot')
-]).extra()
+const mainMenuButtons = Markup.keyboard([
+    [__('user-menu.eps-list-btn')],
+    [__('user-menu.last-ep-btn'), __('user-menu.badge-btn')],
+    [__('start.about-btn'), __('start.creators-btn')]
+])
+    .oneTime()
+    .resize()
+    .extra()
 
-const enterMenu = ctx => ctx.reply(__('user-menu.main-select'), mainMenuButtons)
-userMenuScene.enter(enterMenu)
-userMenuScene.action('user-menu-reply', enterMenu)
-userMenuScene.action('user-menu', async ctx => {
-    await ctx.answerCbQuery()
-    ctx.editMessageText('Select', mainMenuButtons)
+userMenuScene.enter(ctx => {
+    ctx.reply(__('user-menu.welcome'), mainMenuButtons)
 })
 
-userMenuScene.action('all-episodes', async ctx => {
+userMenuScene.action('user-menu', async ctx => {
     await ctx.answerCbQuery()
+    ctx.reply(__('user-menu.home'), mainMenuButtons)
+})
+
+userMenuScene.hears(__('user-menu.eps-list-btn'), async ctx => {
     const episodes = await FileModel.find()
     const list = episodes
-        .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.name}\n\n`, '')
+        .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.caption}\n\n`, '')
         .trim()
-    ctx.editMessageText(
-        __('user-menu.episodes-list', list),
+    ctx.reply(__('user-menu.episodes-list', list),
         Markup.inlineKeyboard([
             Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
         ]).extra()
     )
 })
 
-userMenuScene.action('exit-user-bot', async ctx => {
-    await ctx.answerCbQuery()
-    ctx.editMessageText(__('user-menu.user-exit'))
+userMenuScene.command('exit', async ctx => {
+    ctx.reply(__('user-menu.exit'))
     ctx.scene.leave()
 })
 
@@ -50,7 +52,7 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
             {
                 caption: fileInfo.caption,
                 reply_markup: Markup.inlineKeyboard([
-                    Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu-reply')
+                    Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
                 ])
             }
         )

@@ -28,10 +28,14 @@
     "welcome-back": "Welcome back"
   },
   "user-menu": {
+    "badge-btn": "badge",
     "ep-fetch-error": "Error occured",
-    "episodes-list": "Here are the episodes %s",
-    "go-home": "Get home",
-    "main-select": "Select",
-    "user-exit": "Goodbye. Press /start to start again"
+    "episodes-list": "Here are the episodes:\n\n%s",
+    "eps-list-btn": "All eps",
+    "exit": "Goodbye. Press /start to start again",
+    "go-home-btn": "back",
+    "home": "Select",
+    "last-ep-btn": "Last ep",
+    "welcome": "Welcome\nSelect"
   }
 }

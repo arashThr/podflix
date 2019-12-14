@@ -55,7 +55,6 @@ async function botStart(ctx) {
     const user = await UserModel.findOne({ chatId: tgUser.id })
 
     if (user) {
-        await ctx.reply(__('start.welcome-back'))
         ctx.scene.enter('user-menu-scene')
     } else {
         await ctx.reply(

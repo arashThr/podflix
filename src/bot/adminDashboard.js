@@ -108,7 +108,7 @@ dashboardScene.on('message', async ctx => {
         epKey,
         fileId: doc.file_id,
         name: doc.file_name,
-        caption: ctx.message.caption || '',
+        caption: ctx.message.caption || doc.file_name,
         size: doc.file_size
     }
     const op = await FileModel.create(fileInfo)
