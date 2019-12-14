@@ -10,6 +10,7 @@ if (result.error) {
 
 const configs = {
     botLang: process.env.BOT_LANG || 'en',
+    fakePayment: process.env.FAKE_PAYMENT || false,
     httpPort: 8000, // Port for internal HTTP server
     botPort: 3000,
     serverUrl: process.env.SERVER_URL,

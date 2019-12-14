@@ -11,6 +11,7 @@ const router = express.Router()
 // Webhook path to be set on stripe is ${route}/${webhookPath}
 const webhookPath = '/paysuccess'
 const payPath = '/pay'
+const fakePath = '/fake'
 const stripePath = `${configs.serverUrl}${configs.stripe.route}`
 
 router.get(`${payPath}/:sessionId`, async (req, res) => {
@@ -69,6 +70,20 @@ router.post(webhookPath, async (req, res) => {
     res.sendStatus(200)
 })
 
+if (configs.isInDev && configs.fakePayment) {
+    router.get(`${fakePath}/:clientRefId`, async (req, res) => {
+        res.send('Fake Success')
+        const clientRefId = req.params.clientRefId
+        pub.publish(
+            'payment-verify',
+            JSON.stringify({
+                clientRefId,
+                successful: true
+            })
+        )
+    })
+}
+
 async function getStripeSessionId(amount, clientRefId) {
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -90,9 +105,11 @@ async function getStripeSessionId(amount, clientRefId) {
 }
 
 async function getStripePaymentLink({ amount, clientRefId }) {
+    if (configs.isInDev && configs.fakePayment) {
+        return `${stripePath}${fakePath}/${clientRefId}`
+    }
     const sessionId = await getStripeSessionId(amount, clientRefId)
-    const link = `${stripePath}${payPath}/${sessionId}`
-    return link
+    return `${stripePath}${payPath}/${sessionId}`
 }
 
 module.exports = {
