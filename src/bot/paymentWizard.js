@@ -5,48 +5,48 @@ const Composer = require('telegraf/composer')
 const configs = require('../configs')
 const Commons = require('../common')
 
-const {
-    createPaypinPayment,
-    waitForPaypinPay,
-    createStripePayment,
-    waitForStripePay
-} = require('../payment/paymentController')
+const { createPaypinPayment, createStripePayment } = require('../payment/paymentController')
 
-const selectBuyStep = ctx => {
-    ctx.reply(
-        __('pay.buy-collection'),
+function showPaymentOptions(reply) {
+    reply(
+        __('pay.pay-method'),
         Markup.inlineKeyboard([
-            Markup.callbackButton(__('pay.buy-btn'), 'buy'),
-            Markup.urlButton(__('pay.visit-site-btn'), configs.serverUrl)
+            Markup.callbackButton(__('pay.payping-btn'), 'iran'),
+            Markup.callbackButton(__('pay.stripe-btn'), 'tg-payment'),
+            Markup.callbackButton(__('pay.return-home-btn'), 'return-home') // Todo
         ]).extra()
     )
+}
+
+const paymentDecisonStep = ctx => {
+    showPaymentOptions(ctx.reply)
     return ctx.wizard.next()
 }
 
-const paymentDecisonStep = new Composer()
-paymentDecisonStep.action('buy', ctx => {
-    ctx.editMessageText(
-        __('pay.pay-method'),
-        Markup.inlineKeyboard([
-            Markup.callbackButton(__('pay.iran-pay'), 'iran'),
-            Markup.callbackButton(__('pay.stripe'), 'tg-payment')
-        ]).extra()
-    )
-    return ctx.wizard.next()
-})
-
 const sendPaymentLinkStep = new Composer()
 sendPaymentLinkStep.action('iran', async ctx => {
-    paymentProcess(ctx, createPaypinPayment, waitForPaypinPay)
+    paymentProcess(ctx,
+        createPaypinPayment,
+        configs.app.toomanString
+    )
 })
 
 sendPaymentLinkStep.action('tg-payment', async ctx => {
-    paymentProcess(ctx, createStripePayment, waitForStripePay)
+    paymentProcess(
+        ctx,
+        createStripePayment,
+        configs.app.dollarString
+    )
 })
 
-async function paymentProcess(ctx, createPayment, waitForPay) {
-    const user = Commons.getUserFrom(ctx.from)
-    const link = await createPayment(user.chatId)
+const returnToPaymentOptions = new Composer()
+returnToPaymentOptions.action('reenter-payment', ctx => {
+    ctx.scene.reenter()
+})
+
+async function paymentProcess(ctx, createPayment, priceString) {
+    const tgUser = Commons.getUserFrom(ctx.from)
+    const link = await createPayment(tgUser)
 
     if (!link) {
         ctx.editMessageText(__('pay.link-failed'))
@@ -54,26 +54,20 @@ async function paymentProcess(ctx, createPayment, waitForPay) {
         return
     }
     await ctx.editMessageText(
-        __('pay.click-to-pay'),
-        Markup.inlineKeyboard([Markup.urlButton(__('pay.pay-btn'), link)]).extra()
+        __('pay.payment-desc', priceString),
+        Markup.inlineKeyboard([
+            Markup.urlButton(__('pay.pay-btn'), link),
+            // Todo
+            Markup.callbackButton(__('pay.return-to-payment-btn'), 'reenter-payment')
+        ]).extra()
     )
-
-    const success = await waitForPay(user)
-
-    if (success) {
-        ctx.editMessageText(__('pay.success'))
-        ctx.scene.enter('user-menu-scene')
-    } else {
-        ctx.editMessageText(__('pay.canceled'))
-        ctx.scene.enter('payment-wizard')
-    }
 }
 
 const paymentWizard = new WizardScene(
     'payment-wizard',
-    selectBuyStep,
     paymentDecisonStep,
-    sendPaymentLinkStep
+    sendPaymentLinkStep,
+    returnToPaymentOptions
 )
 
 module.exports = paymentWizard

@@ -19,9 +19,13 @@ const paymentSchema = new mongoose.Schema(
             ],
             default: 'requested'
         },
-        chatId: Number,
+        tgUser: {
+            chatId: Number,
+            userName: String,
+            realName: String
+        },
         amount: Number,
-        refId: String
+        refId: String // Todo: Make it required
     },
     { discriminatorKey: 'currency' }
 )
@@ -31,3 +35,4 @@ const PaymentModel = mongoose.model('Payment', paymentSchema)
 exports.irrPaymentModel = PaymentModel.discriminator('IRR', new mongoose.Schema({}))
 exports.usdPaymentModel = PaymentModel.discriminator('USD', new mongoose.Schema({}))
 exports.paymentState = paymentState
+exports.PaymentModel = PaymentModel

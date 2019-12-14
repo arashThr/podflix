@@ -29,7 +29,9 @@ const configs = {
 
     app: {
         toomanPrice: process.env.APP_PRICE || 100,
-        dollarPrice: 500
+        toomanString: '۲۹٫۰۰۰ تومان',
+        dollarPrice: 500,
+        dollarString: '۵٫۹۹ دلار'
     }
 }
 
