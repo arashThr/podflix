@@ -19,7 +19,7 @@ async function getDollarAmount(chatId) {
     return discount.dollarPrice
 }
 
-async function createPaypinPayment(tgUser) {
+async function createPaypingPayment(tgUser) {
     const amount = await getToomanAmount(tgUser.chatId)
     const payment = await irrPaymentModel.create({ amount, tgUser })
 
@@ -45,5 +45,5 @@ async function createStripePayment(tgUser) {
 
 module.exports = {
     createStripePayment,
-    createPaypinPayment
+    createPaypingPayment
 }

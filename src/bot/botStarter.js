@@ -46,6 +46,8 @@ function initBot(bot) {
             ctx.reply('Database dropped')
         })
     }
+    // For support
+    bot.command('getId', ctx => ctx.reply(`You chat id is: ${ctx.from.id}`))
 }
 
 async function botStart(ctx) {
@@ -60,9 +62,9 @@ async function botStart(ctx) {
         await ctx.reply(
             __('start.unknown-user'),
             Markup.keyboard([
-                [__('start.buy-btn'), __('start.teaser-btn')], // Row1 with 2 buttons
-                [__('start.ep0-btn'), __('start.about-btn')], // Row2 with 2 buttons
-                [__('start.creators-btn'), '👥 Share'] // Row3 with 3 buttons
+                [__('start.teaser-btn'), __('start.ep0-btn')],
+                [__('start.buy-btn')],
+                [__('start.about-btn'), __('start.creators-btn')]
             ])
                 .oneTime()
                 .resize()

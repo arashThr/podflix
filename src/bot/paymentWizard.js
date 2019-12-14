@@ -6,7 +6,7 @@ const configs = require('../configs')
 const Commons = require('../common')
 
 const { applyDiscount, addFreeUser, findDiscountFor } = require('../payment/discounts')
-const { createPaypinPayment, createStripePayment } = require('../payment/paymentController')
+const { createPaypingPayment, createStripePayment } = require('../payment/paymentController')
 
 function showPaymentOptions(reply) {
     reply(
@@ -22,7 +22,7 @@ function showPaymentOptions(reply) {
 function getPaymentsFuncs(isUSD, discount) {
     const { dollarPrice, toomanPrice } = discount || {}
     const createPayment = isUSD
-        ? createStripePayment : createPaypinPayment
+        ? createStripePayment : createPaypingPayment
     const priceString = isUSD
         ? Commons.getDollarString(dollarPrice || configs.app.dollarPrice)
         : Commons.getToomanString(toomanPrice || configs.app.toomanPrice)
