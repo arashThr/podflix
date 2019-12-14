@@ -36,30 +36,48 @@ userMenuScene.hears(__('user-menu.eps-list-btn'), async ctx => {
     )
 })
 
+userMenuScene.hears(__('user-menu.last-ep-btn'), async ctx => {
+    try {
+        const latest = await FileModel.find().sort({ _id: -1 }).limit(1)
+        if (latest.length !== 1) {
+            ctx.reply('Nothing exists')
+            return
+        }
+        const fileInfo = latest[0]
+        sendEpisodeFile(ctx, fileInfo)
+    } catch (e) {
+        ctx.reply(__('user-menu.ep-fetch-error'))
+        console.error(e)
+    }
+})
+
 userMenuScene.command('exit', async ctx => {
     ctx.reply(__('user-menu.exit'))
     ctx.scene.leave()
 })
 
 userMenuScene.hears(Commons.epNameRegex, async ctx => {
-    const epKey = ctx.match[1]
-    ctx.session.epKey = epKey
-
-    const fileInfo = await FileModel.findOne({ epKey })
     try {
-        ctx.replyWithDocument(
-            fileInfo.fileId,
-            {
-                caption: fileInfo.caption,
-                reply_markup: Markup.inlineKeyboard([
-                    Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
-                ])
-            }
-        )
+        const epKey = ctx.match[1]
+        ctx.session.epKey = epKey
+        const fileInfo = await FileModel.findOne({ epKey })
+        sendEpisodeFile(ctx, fileInfo)
     } catch (e) {
         ctx.reply(__('user-menu.ep-fetch-error'))
         console.error(e)
     }
 })
+
+function sendEpisodeFile(ctx, fileInfo) {
+    ctx.replyWithDocument(
+        fileInfo.fileId,
+        {
+            caption: fileInfo.caption,
+            reply_markup: Markup.inlineKeyboard([
+                Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
+            ])
+        }
+    )
+}
 
 module.exports = userMenuScene

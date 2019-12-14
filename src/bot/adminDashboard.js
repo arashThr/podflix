@@ -114,7 +114,12 @@ dashboardScene.on('message', async ctx => {
     const op = await FileModel.create(fileInfo)
     if (!op.errors) {
         logger.info('File added')
-        broadcastNewFile(ctx, fileInfo)
+        try {
+            broadcastNewFile(ctx, fileInfo)
+        } catch (err) {
+            logger.error('Broadcasting file failed', { err })
+            return
+        }
         ctx.reply('Send another or hit back', goHomeButton())
     } else {
         ctx.reply('Adding new file failed', goHomeButton())
@@ -141,7 +146,7 @@ async function broadcastNewFile(ctx, fileInfo) {
                 {
                     caption: 'New episode released!\n' + fileInfo.caption,
                     reply_markup: Markup.inlineKeyboard([
-                        Markup.callbackButton('Get home', 'user-menu-reply')
+                        Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
                     ])
                 }
             )
