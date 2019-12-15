@@ -5,8 +5,15 @@ const Composer = require('telegraf/composer')
 const configs = require('../configs')
 const Commons = require('../common')
 
-const { applyDiscount, addFreeUser, findDiscountFor } = require('../payment/discounts')
-const { createPaypingPayment, createStripePayment } = require('../payment/paymentController')
+const {
+    applyDiscount,
+    addFreeUser,
+    findDiscountFor
+} = require('../payment/discounts')
+const {
+    createPaypingPayment,
+    createStripePayment
+} = require('../payment/paymentController')
 
 function showPaymentOptions(reply) {
     reply(
@@ -15,14 +22,13 @@ function showPaymentOptions(reply) {
             Markup.callbackButton(__('pay.payping-btn'), 'iran'),
             Markup.callbackButton(__('pay.stripe-btn'), 'tg-payment'),
             Markup.callbackButton(__('pay.return-home-btn'), 'return-home') // Todo
-        ]).extra()
+        ]).extra({ parse_mode: 'Markdown' })
     )
 }
 
 function getPaymentsFuncs(isUSD, discount) {
     const { dollarPrice, toomanPrice } = discount || {}
-    const createPayment = isUSD
-        ? createStripePayment : createPaypingPayment
+    const createPayment = isUSD ? createStripePayment : createPaypingPayment
     const priceString = isUSD
         ? Commons.getDollarString(dollarPrice || configs.app.dollarPrice)
         : Commons.getToomanString(toomanPrice || configs.app.toomanPrice)
@@ -55,8 +61,10 @@ sendPaymentLinkStep.action('return-home', async ctx => {
 async function paymentProcess(ctx) {
     const tgUser = Commons.getUserFrom(ctx.from)
     const discount = await findDiscountFor(tgUser.chatId)
-    const { createPayment, priceString } =
-        getPaymentsFuncs(ctx.session.isUSD, discount)
+    const { createPayment, priceString } = getPaymentsFuncs(
+        ctx.session.isUSD,
+        discount
+    )
 
     const link = await createPayment(tgUser)
 
@@ -70,10 +78,13 @@ async function paymentProcess(ctx) {
         Markup.inlineKeyboard([
             [Markup.urlButton(__('pay.pay-btn'), link)],
             [
-                Markup.callbackButton(__('pay.return-to-payment-btn'), 'reenter-payment'),
+                Markup.callbackButton(
+                    __('pay.return-to-payment-btn'),
+                    'reenter-payment'
+                ),
                 Markup.callbackButton(__('pay.promo-code-btn'), 'promo-code')
             ]
-        ]).extra()
+        ]).extra({ parse_mode: 'Markdown' })
     )
 }
 
@@ -106,8 +117,10 @@ promoCode.on('text', async ctx => {
     }
     const discount = await findDiscountFor(chatId)
     const tgUser = Commons.getUserFrom(ctx.from)
-    const { createPayment, priceString } =
-        getPaymentsFuncs(ctx.session.isUSD, discount)
+    const { createPayment, priceString } = getPaymentsFuncs(
+        ctx.session.isUSD,
+        discount
+    )
     ctx.session.payInfo = null
 
     const link = await createPayment(tgUser)
@@ -121,8 +134,11 @@ promoCode.on('text', async ctx => {
         __('pay.payment-desc', priceString),
         Markup.inlineKeyboard([
             Markup.urlButton(__('pay.pay-btn'), link),
-            Markup.callbackButton(__('pay.return-to-payment-btn'), 'reenter-payment')
-        ]).extra()
+            Markup.callbackButton(
+                __('pay.return-to-payment-btn'),
+                'reenter-payment'
+            )
+        ]).extra({ parse_mode: 'Markdown' })
     )
     return ctx.wizard.next()
 })

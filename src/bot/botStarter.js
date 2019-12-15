@@ -68,7 +68,7 @@ async function botStart(ctx) {
             ])
                 .oneTime()
                 .resize()
-                .extra()
+                .extra({ parse_mode: 'Markdown' })
         )
     }
 }

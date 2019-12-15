@@ -16,7 +16,9 @@ function listenToPayments(bot) {
         // Todo: get ref id of payment
         const { clientRefId, successful } = JSON.parse(message)
         const payId = clientRefId
-        logger.verbose(`New message for ${channel}, refId(payId): ${payId}, successful: ${successful}`)
+        logger.verbose(
+            `New message for ${channel}, refId(payId): ${payId}, successful: ${successful}`
+        )
 
         if (!ObjectId.isValid(payId)) {
             logger.warn('Invalid object id for payId: ', { payId })
@@ -39,25 +41,35 @@ function listenToPayments(bot) {
 
         try {
             await savePaymentDiscountFor(tgUser.chatId, payId)
-            await paymentModel.updateOne({ _id: payId }, {
-                $set: {
-                    updated: new Date(),
-                    status: paymentState.successful
+            await paymentModel.updateOne(
+                { _id: payId },
+                {
+                    $set: {
+                        updated: new Date(),
+                        status: paymentState.successful
+                    }
                 }
-            })
+            )
 
             tgUser.paymentId = payId
             await PayedUserModel.create(tgUser.toObject())
-            bot.telegram.sendMessage(tgUser.chatId, __('pay.success'))
+            bot.telegram.sendMessage(tgUser.chatId, __('pay.success'), {
+                parse_mode: 'Markdown'
+            })
         } catch (error) {
             logger.error('Error occured in payment process', { error })
-            paymentModel.updateOne({ _id: payId }, {
-                $set: {
-                    updated: new Date(),
-                    status: paymentState.canceled
+            paymentModel.updateOne(
+                { _id: payId },
+                {
+                    $set: {
+                        updated: new Date(),
+                        status: paymentState.canceled
+                    }
                 }
+            )
+            bot.telegram.sendMessage(tgUser.chatId, __('pay.success'), {
+                parse_mode: 'Markdown'
             })
-            bot.telegram.sendMessage(tgUser.chatId, __('pay.success'))
         }
     })
 
