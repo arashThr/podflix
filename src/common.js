@@ -14,9 +14,7 @@ const epNameLength = 6
 
 module.exports = {
     EP_NAME_LENGTH: epNameLength,
-    epNameRegex: () => {
-        return new RegExp(`^\/(ep_[a-z0-9]{${epNameLength}})$`)
-    },
+    epNameRegex: new RegExp(`^\/(ep_[a-z0-9]{${epNameLength}})$`),
     getUserFrom(tgUser) {
         return {
             chatId: tgUser.id,
