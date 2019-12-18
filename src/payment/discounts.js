@@ -1,4 +1,3 @@
-const { discountsCollection } = require('../db')
 const fs = require('fs')
 const path = require('path')
 
@@ -7,7 +6,7 @@ const DiscountModel = require('../models/discountModel')
 const { FreeUserModel } = require('../models/userModel')
 
 async function applyDiscount(chatId, code) {
-    const alreadyApplied = await discountsCollection().findOne({ chatId })
+    const alreadyApplied = await DiscountModel.findOne({ chatId })
     if (alreadyApplied) return { reason: 'code alreay applied' }
     try {
         const discounts = readPromoCodes()

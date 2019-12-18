@@ -30,9 +30,8 @@ userMenuScene.hears(__('user-menu.eps-list-btn'), async ctx => {
     const list = episodes
         .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.caption}\n\n`, '')
         .trim()
-    const aa = __('user-menu.episodes-list', list)
     ctx.reply(
-        aa,
+        __('user-menu.episodes-list', list),
         Markup.inlineKeyboard([
             Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
         ]).extra({ parse_mode: 'HTML' })
