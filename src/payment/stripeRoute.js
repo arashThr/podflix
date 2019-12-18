@@ -94,9 +94,9 @@ async function getStripeSessionId(amount, clientRefId) {
         line_items: [
             {
                 amount,
-                name: 'T-shirt',
-                description: 'Comfortable cotton t-shirt',
-                images: ['https://picsum.photos/200/300'],
+                name: __('stripe-page.name'),
+                description: __('stripe-page.desc'),
+                images: [configs.app.coverImage],
                 currency: 'usd',
                 quantity: 1
             }

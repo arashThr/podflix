@@ -31,7 +31,8 @@ const configs = {
 
     app: {
         toomanPrice: process.env.TOOMAN_PRICE || 29000,
-        dollarPrice: process.env.DOLLAR_PRICE || 599
+        dollarPrice: process.env.DOLLAR_PRICE || 599,
+        coverImage: 'https://telegra.ph/file/6d4e6b24bd97dae0d5d25.jpg'
     }
 }
 

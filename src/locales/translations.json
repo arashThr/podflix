@@ -39,6 +39,10 @@
     "unknown-user": "You are unknown",
     "welcome-back": "Welcome back"
   },
+  "stripe-page": {
+    "desc": "But this collection",
+    "name": "Atomic wars"
+  },
   "user-menu": {
     "badge-btn": "badge",
     "badges": "Get badges",
