@@ -54,6 +54,7 @@ function initPaymentServer(app) {
 
     app.use(configs.payping.route, paypingRouter)
     app.use(configs.stripe.route, stripeRouter)
+    app.use('/assets', express.static(path.join(__dirname, './payment/public')))
 }
 
 start()

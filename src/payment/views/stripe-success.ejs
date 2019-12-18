@@ -1,30 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
     <head>
         <meta charset="utf-8" />
         <title>Stripe Checkout Sample</title>
         <meta name="description" content="A demo of Stripe Payment Intents" />
 
         <link rel="icon" href="favicon.ico" type="image/x-icon" />
+        <link href="/assets/style.css" rel="stylesheet" type="text/css" />
     </head>
 
     <body>
-        <header class="sr-header">
-            <div class="sr-header__logo"></div>
-        </header>
-
-        <div>
+        <% if(isInDev){ %>
+        <div style="direction: ltr;">
             <h1>Your payment succeeded</h1>
             <h4>
                 View CheckoutSession response:
             </h4>
-        </div>
 
-        <div>
             <div class="sr-callout">
                 <pre><%- session %></pre>
             </div>
             <button onclick="window.location.href = '/';">Restart demo</button>
+        </div>
+
+        <% } %>
+
+        <div>
+            <div class="modal">
+                <div id="success-icon">
+                    <div></div>
+                </div>
+                <h1><strong><%= successTitle %></strong></h1>
+                <br />
+                <p class="points">
+                    <%= successDesc %>
+                </p>
+                <hr />
+                <a href="<%= botUrl %>" target="_blank" class="btn">
+                    <%= goToBot %>
+                </a>
+            </div>
         </div>
     </body>
 </html>

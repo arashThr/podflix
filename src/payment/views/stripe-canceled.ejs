@@ -1,17 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Stripe Checkout Sample</title>
-    <meta name="description" content="A demo of Stripe Payment Intents" />
+<html lang="fa">
+    <head>
+        <meta charset="utf-8" />
+        <title>Stripe Checkout Sample</title>
+        <meta name="description" content="A demo of Stripe Payment Intents" />
 
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  </head>
+        <link rel="icon" href="favicon.ico" type="image/x-icon" />
+        <link href="/assets/style.css" rel="stylesheet" type="text/css" />
+    </head>
 
-  <body>
-    <div>
-        <h1>Your payment was canceled</h1>
-        <button onclick="window.location.href = '/';">Restart demo</button>
-    </div>
-  </body>
+    <body>
+        <% if(isInDev){ %>
+        <div>
+            <h1>Your payment was canceled</h1>
+            <button onclick="window.location.href = '/';">Restart demo</button>
+        </div>
+        <% } %>
+
+        <div>
+            <div class="modal">
+                <div id="fail-icon">
+                    <div id="no1"></div> <div id="no2"></div>
+                </div>
+                <h1><strong><%= cancelTitle %></strong></h1>
+                <br />
+                <p class="points">
+                    <%= cancelDesc %>
+                </p>
+                <hr />
+                <a href="<%= botUrl %>" target="_blank" class="btn">
+                    <%= goToBot %>
+                </a>
+            </div>
+        </div>
+        
+    </body>
 </html>

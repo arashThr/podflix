@@ -14,6 +14,7 @@ const configs = {
     httpPort: 8000, // Port for internal HTTP server
     botPort: 3000,
     serverUrl: process.env.SERVER_URL,
+    botUrl: process.env.BOT_URL,
     isInDev: (process.env.NODE_ENV || 'development') === 'development',
     logLevel: process.env.LOG_LEVEL || 'info',
     redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',

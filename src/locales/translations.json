@@ -18,6 +18,13 @@
     "stripe-btn": "No!",
     "success": "Success"
   },
+  "site": {
+    "canceled-pay": "Failed",
+    "canceled-title": "Canceled",
+    "go-back-btn": "Return to bot",
+    "success-pay": "Payment done",
+    "success-title": "Pay Success"
+  },
   "start": {
     "about": "About us",
     "about-btn": "about the project",

@@ -28,7 +28,12 @@ router.get('/success', async (req, res) => {
         const session = await stripe.checkout.sessions.retrieve(sessionId)
         const sessionJSON = JSON.stringify(session, null, 2)
         res.render('stripe-success', {
-            session: sessionJSON
+            session: sessionJSON,
+            successTitle: __('site.success-title'),
+            successDesc: __('site.success-pay'),
+            goToBot: __('site.go-back-btn'),
+            botUrl: configs.botUrl,
+            isInDev: configs.isInDev
         })
 
         pub.publish(
@@ -39,7 +44,7 @@ router.get('/success', async (req, res) => {
             })
         )
     } catch (err) {
-        logger.error('Error when fetching Checkout session', err)
+        logger.error('Error when fetching Checkout session', { err })
         res.send('Error occured when trying to fetch payment details')
     }
 })
@@ -54,7 +59,13 @@ router.get('/canceled', async (req, res) => {
         })
     )
 
-    res.render('stripe-canceled')
+    res.render('stripe-canceled', {
+        cancelTitle: __('site.canceled-title'),
+        cancelDesc: __('site.canceled-pay'),
+        goToBot: __('site.go-back-btn'),
+        botUrl: configs.botUrl,
+        isInDev: configs.isInDev
+    })
 })
 
 // Webhook handler for asynchronous events.
