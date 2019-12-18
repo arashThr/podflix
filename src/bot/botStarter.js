@@ -16,9 +16,6 @@ const discountScene = require('./discountScene')
 const { UserModel } = require('../models/userModel')
 const listenToPayments = require('../payment/paymentListener')
 
-// For more info on webhookReply: false checkout this issue:
-// https://github.com/telegraf/telegraf/issues/320
-
 function initBot(bot) {
     listenToPayments(bot)
     const stage = new Stage([
@@ -40,10 +37,9 @@ function initBot(bot) {
     })
 
     if (configs.isInDev) {
-        const { getDb } = require('../db')
         bot.command('clear', async ctx => {
-            await getDb().dropDatabase()
-            ctx.reply('Database dropped')
+            await UserModel.deleteOne({ chatId: ctx.from.id })
+            ctx.reply('User dropped')
         })
     }
     // For support

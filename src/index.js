@@ -22,6 +22,8 @@ async function start() {
     initPaymentServer(app)
 
     const bot = new Telegraf(configs.botToken, {
+        // For more info on webhookReply: false checkout this issue:
+        // https://github.com/telegraf/telegraf/issues/320
         telegram: { webhookReply: false }
     })
     initBot(bot)
