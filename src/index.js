@@ -3,6 +3,7 @@ const crypto = require('crypto')
 
 const express = require('express')
 const Telegraf = require('telegraf')
+const Sentry = require('@sentry/node')
 
 const configs = require('./configs')
 const { initBot } = require('./bot/botStarter')
@@ -12,6 +13,9 @@ const { stripeRouter } = require('./payment/stripeRoute')
 const { paypingRouter } = require('./payment/paypingRoute')
 
 async function start() {
+    if (!configs.isInDev && configs.sentryDSN)
+        Sentry.init({ dsn: configs.sentryDSN })
+
     const connected = await initDb()
     if (!connected) {
         console.error('DB connection failed')

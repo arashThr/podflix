@@ -27,6 +27,7 @@ const configs = {
         disableLoginWithPass: false
     },
     botToken: process.env.BOT_TOKEN,
+    sentryDSN: process.env.SENTRY_DSN,
 
     app: {
         toomanPrice: process.env.TOOMAN_PRICE || 29000,
