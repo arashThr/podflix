@@ -30,7 +30,7 @@ router.get('/success', async (req, res) => {
         const sessionJSON = JSON.stringify(session, null, 2)
         res.render('stripe-success', {
             session: sessionJSON,
-            ...paymentReturnPageInfo
+            ...paymentReturnPageInfo()
         })
 
         pub.publish(
@@ -56,7 +56,7 @@ router.get('/canceled', async (req, res) => {
         })
     )
 
-    res.render('stripe-canceled', paymentReturnPageInfo)
+    res.render('stripe-canceled', paymentReturnPageInfo())
 })
 
 // Webhook handler for asynchronous events.

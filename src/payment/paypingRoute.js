@@ -30,7 +30,7 @@ router.get(configs.payping.returnPath, async (req, res) => {
             ...paymentReturnPageInfo
         })
     } else {
-        res.render('stripe-canceled', paymentReturnPageInfo)
+        res.render('stripe-canceled', paymentReturnPageInfo())
     }
 
     pub.publish(

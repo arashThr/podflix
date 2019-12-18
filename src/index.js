@@ -26,6 +26,10 @@ async function start() {
         // https://github.com/telegraf/telegraf/issues/320
         telegram: { webhookReply: false }
     })
+    if (!configs.app.botUserName) {
+        const botInfo = await bot.telegram.getMe()
+        configs.app.botUserName = botInfo.username
+    }
     initBot(bot)
 
     // The reason to seperate these two is that in production I want to be able to serve

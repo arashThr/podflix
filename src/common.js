@@ -20,15 +20,17 @@ module.exports = {
     ep0Key: 'ep0FileId',
     teaserKey: 'teaserFileId',
 
-    paymentReturnPageInfo: {
-        title: __('site.title'),
-        successTitle: __('site.success-title'),
-        successDesc: __('site.success-pay'),
-        cancelTitle: __('site.canceled-title'),
-        cancelDesc: __('site.canceled-pay'),
-        goToBot: __('site.go-back-btn'),
-        botUrl: configs.botUrl,
-        isInDev: configs.isInDev
+    paymentReturnPageInfo() {
+        return {
+            title: __('site.title'),
+            successTitle: __('site.success-title'),
+            successDesc: __('site.success-pay'),
+            cancelTitle: __('site.canceled-title'),
+            cancelDesc: __('site.canceled-pay'),
+            goToBot: __('site.go-back-btn'),
+            botUrl: `https://t.me/${configs.app.botUserName}`,
+            isInDev: configs.isInDev
+        }
     },
     getUserFrom(tgUser) {
         return {
