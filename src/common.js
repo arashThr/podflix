@@ -28,8 +28,7 @@ module.exports = {
             cancelTitle: __('site.canceled-title'),
             cancelDesc: __('site.canceled-pay'),
             goToBot: __('site.go-back-btn'),
-            botUrl: `https://t.me/${configs.app.botUserName}`,
-            isInDev: configs.isInDev
+            botUrl: `https://t.me/${configs.app.botUserName}`
         }
     },
     getUserFrom(tgUser) {

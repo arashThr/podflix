@@ -10,21 +10,6 @@
     </head>
 
     <body>
-        <% if(isInDev){ %>
-        <div style="direction: ltr;">
-            <h1>Your payment succeeded</h1>
-            <h4>
-                View CheckoutSession response:
-            </h4>
-
-            <div class="sr-callout">
-                <pre><%- session %></pre>
-            </div>
-            <button onclick="window.location.href = '/';">Restart demo</button>
-        </div>
-
-        <% } %>
-
         <div>
             <div class="modal">
                 <div id="success-icon">

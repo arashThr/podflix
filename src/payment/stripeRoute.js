@@ -26,23 +26,12 @@ router.get(`${payPath}/:sessionId`, async (req, res) => {
 router.get('/success', async (req, res) => {
     const sessionId = req.query.session_id
     try {
-        const session = await stripe.checkout.sessions.retrieve(sessionId)
-        const sessionJSON = JSON.stringify(session, null, 2)
-        res.render('stripe-success', {
-            session: sessionJSON,
-            ...paymentReturnPageInfo()
-        })
-
-        pub.publish(
-            'payment-verify',
-            JSON.stringify({
-                clientRefId: session.client_reference_id,
-                successful: true,
-                extra: session
-            })
-        )
+        const info = paymentReturnPageInfo()
+        if (configs.isInDev)
+            await anounceSuccessPay(sessionId)
+        res.render('stripe-success', info)
     } catch (err) {
-        logger.error('Error when fetching Checkout session', { err })
+        logger.error('Rendering success page failed', { err })
         res.send('Error occured when trying to fetch payment details')
     }
 })
@@ -66,8 +55,14 @@ router.post(webhookPath, async (req, res) => {
     const data = req.body.data
     const eventType = req.body.type
 
+    logger.verbose('Webhook called')
     if (eventType === 'checkout.session.completed') {
-        console.log('🔔  Payment received!', data)
+        logger.info('🔔  Payment received!', data)
+        try {
+            anounceSuccessPay(data.id)
+        } catch (err) {
+            logger.error('Error when fetching Checkout session', { err })
+        }
     }
 
     res.sendStatus(200)
@@ -85,6 +80,22 @@ if (configs.isInDev && configs.fakePayment) {
             })
         )
     })
+}
+
+async function anounceSuccessPay(sessionId) {
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    if (configs.isInDev) {
+        const sessionJSON = JSON.stringify(session, null, 2)
+        logger.debug(sessionJSON)
+    }
+    pub.publish(
+        'payment-verify',
+        JSON.stringify({
+            clientRefId: session.client_reference_id,
+            successful: true,
+            extra: session
+        })
+    )
 }
 
 async function getStripeSessionId(amount, clientRefId) {
