@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const configs = require('./configs')
 const logger = require('./logger')
+const redis = require('redis')
 
 let db = null
 async function initDb() {
@@ -20,9 +21,13 @@ async function initDb() {
     }
 }
 
+const redisClient = redis.createClient()
+redisClient.on('error', err => {
+    logger.error('Redis start failed', { err })
+    process.exit()
+})
+
 module.exports = {
     initDb,
-    getDb() { return db },
-    discountsCollection() { return db.collection('discounts') },
-    close: () => db.close()
+    redisClient
 }

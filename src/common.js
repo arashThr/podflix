@@ -17,6 +17,9 @@ const epNameLength = 6
 module.exports = {
     EP_NAME_LENGTH: epNameLength,
     epNameRegex: new RegExp(`^\/(ep_[a-z0-9]{${epNameLength}})$`),
+    ep0Key: 'ep0FileId',
+    teaserKey: 'teaserFileId',
+
     paymentReturnPageInfo: {
         title: __('site.title'),
         successTitle: __('site.success-title'),

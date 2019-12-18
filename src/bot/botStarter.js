@@ -4,6 +4,9 @@ const Stage = require('telegraf/stage')
 const { enter } = Stage
 
 const configs = require('../configs')
+const logger = require('../logger')
+const Commons = require('../common')
+const { redisClient } = require('../db')
 
 // Admin
 const loginScene = require('./loginScene')
@@ -15,6 +18,15 @@ const userMenuScene = require('./userMenu')
 const discountScene = require('./discountScene')
 const { UserModel } = require('../models/userModel')
 const listenToPayments = require('../payment/paymentListener')
+
+const menuKeys = Markup.keyboard([
+    [__('start.teaser-btn'), __('start.ep0-btn')],
+    [__('start.buy-btn')],
+    [__('start.about-btn'), __('start.creators-btn')]
+])
+    .oneTime()
+    .resize()
+    .extra({ parse_mode: 'Markdown' })
 
 function initBot(bot) {
     listenToPayments(bot)
@@ -28,13 +40,33 @@ function initBot(bot) {
 
     bot.use(session())
     bot.use(stage.middleware())
-    bot.command('login', enter('login'))
-    bot.command('promo', enter('discount-scene'))
+
     bot.start(botStart)
 
-    bot.hears(__('start.buy-btn'), ctx => {
-        ctx.scene.enter('payment-wizard')
+    bot.command('login', enter('login'))
+    bot.command('promo', enter('discount-scene'))
+    bot.hears(__('start.buy-btn'), enter('payment-wizard'))
+
+    bot.hears(__('start.teaser-btn'), ctx => {
+        redisClient.get(Commons.teaserKey, (err, fileId) => {
+            if (err) logger.error('Getting teaser failed', { err })
+            else ctx.replyWithVideo(fileId, { caption: __('start.teaser') })
+        })
     })
+
+    bot.hears(__('start.ep0-btn'), ctx => {
+        redisClient.get(Commons.ep0Key, (err, fileId) => {
+            if (err) logger.error('Getting teaser failed', { err })
+            else ctx.replyWithAudio(fileId, { caption: __('start.ep0') })
+        })
+    })
+
+    bot.hears(__('start.about-btn'), ({ reply }) =>
+        returnMd(reply, __('start.about'))
+    )
+    bot.hears(__('start.creators-btn'), ({ reply }) =>
+        returnMd(reply, __('start.creators'))
+    )
 
     if (configs.isInDev) {
         bot.command('clear', async ctx => {
@@ -46,6 +78,10 @@ function initBot(bot) {
     bot.command('getId', ctx => ctx.reply(`You chat id is: ${ctx.from.id}`))
 }
 
+function returnMd(reply, text) {
+    return reply(text, menuKeys)
+}
+
 async function botStart(ctx) {
     const tgUser = ctx.from
     if (tgUser.is_bot) return
@@ -55,17 +91,7 @@ async function botStart(ctx) {
     if (user) {
         ctx.scene.enter('user-menu-scene')
     } else {
-        await ctx.reply(
-            __('start.unknown-user'),
-            Markup.keyboard([
-                [__('start.teaser-btn'), __('start.ep0-btn')],
-                [__('start.buy-btn')],
-                [__('start.about-btn'), __('start.creators-btn')]
-            ])
-                .oneTime()
-                .resize()
-                .extra({ parse_mode: 'Markdown' })
-        )
+        await ctx.reply(__('start.unknown-user'), menuKeys)
     }
 }
 

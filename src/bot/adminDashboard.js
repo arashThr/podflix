@@ -3,18 +3,29 @@ const Markup = require('telegraf/markup')
 const logger = require('../logger')
 const FileModel = require('../models/fileModel')
 const { PayedUserModel } = require('../models/userModel')
+const { redisClient } = require('../db')
 const Commons = require('../common')
 
 const dashboardScene = new Scene('dashboard')
 const dashboardState = {
     SENDING_FILE: 'sending',
-    MAIN_MENU: 'menu'
+    MAIN_MENU: 'menu',
+    TEASER: Commons.teaserKey,
+    EP0: Commons.ep0Key
 }
 
+const menuItems = 'Select:'
+
 const menuKeyboard = Markup.inlineKeyboard([
-    Markup.callbackButton('Show Files', 'show-files'),
-    Markup.callbackButton('Add File', 'add-file'),
-    Markup.callbackButton('Exit', 'exit-dashboard')
+    [
+        Markup.callbackButton('Show Files', 'show-files'),
+        Markup.callbackButton('Add File', 'add-file')
+    ],
+    [
+        Markup.callbackButton('Add Teaser', Commons.teaserKey),
+        Markup.callbackButton('Add Ep0', Commons.ep0Key)
+    ],
+    [Markup.callbackButton('Exit', 'exit-dashboard')]
 ]).extra()
 
 function goHomeButton(keys = []) {
@@ -25,7 +36,19 @@ function goHomeButton(keys = []) {
 
 dashboardScene.enter(ctx => {
     ctx.session.dashboardState = dashboardState.MAIN_MENU
-    ctx.reply('Select', menuKeyboard)
+    ctx.reply(menuItems, menuKeyboard)
+})
+
+dashboardScene.action(Commons.teaserKey, async ctx => {
+    await ctx.answerCbQuery()
+    ctx.session.dashboardState = dashboardState.TEASER
+    ctx.editMessageText('Send teaser', goHomeButton())
+})
+
+dashboardScene.action(Commons.ep0Key, async ctx => {
+    await ctx.answerCbQuery()
+    ctx.session.dashboardState = dashboardState.EP0
+    ctx.editMessageText('Send ep0', goHomeButton())
 })
 
 dashboardScene.action('exit-dashboard', ctx => {
@@ -82,21 +105,29 @@ dashboardScene.action('add-file', async ctx => {
 
 dashboardScene.action('dashboard-main', async ctx => {
     await ctx.answerCbQuery()
-    ctx.editMessageText('Select', menuKeyboard)
+    ctx.editMessageText(menuItems, menuKeyboard)
     ctx.session.dashboardState = dashboardState.MAIN_MENU
 })
 
 dashboardScene.on('message', async ctx => {
-    if (ctx.session.dashboardState !== dashboardState.SENDING_FILE) return
-    // Todo: Music is audio
-    const doc = ctx.message.document
+    const state = ctx.session.dashboardState
+    if (state === dashboardState.MAIN_MENU) return
+    const doc = ctx.message.audio || ctx.message.video
     if (!doc) {
-        logger.warn('Not a FILE!!!')
+        logger.warn('File is not Audio nor Video!')
         return ctx.reply(
             'This is not a file. Try again or hit back',
             goHomeButton()
         )
     }
+    if (state === dashboardState.TEASER || state === dashboardState.EP0) {
+        redisClient.set(state, doc.file_id, err => {
+            if (err) logger.error('Error in setting teaser file', { err })
+            ctx.reply(err ? 'Failed' : 'ok', goHomeButton())
+        })
+        return
+    }
+
     // Todo: check doc.mime_type
     const epKey =
         'ep_' +
