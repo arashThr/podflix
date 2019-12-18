@@ -15,22 +15,22 @@ function listenToPayments(bot) {
     sub.on('message', async (channel, message) => {
         // Todo: get ref id of payment
         const { clientRefId, successful } = JSON.parse(message)
-        const payId = clientRefId
         logger.verbose(
-            `New message for ${channel}, refId(payId): ${payId}, successful: ${successful}`
+            `New message for ${channel}, clientRefId(payId): ${clientRefId}, successful: ${successful}`
         )
 
-        if (!ObjectId.isValid(payId)) {
-            logger.warn('Invalid object id for payId: ', { payId })
+        if (!ObjectId.isValid(clientRefId)) {
+            logger.warn('Invalid object id for payId: ', { clientRefId })
             return
         }
+        const payId = ObjectId(clientRefId)
 
-        const paymentModel = await PaymentModel.findById(ObjectId(payId))
-        if (!paymentModel) {
+        const payment = await PaymentModel.findById(payId)
+        if (!payment) {
             logger.warn('No payment found for payId: ', { payId })
             return
         }
-        const tgUser = paymentModel.tgUser
+        const tgUser = payment.tgUser
 
         if (!successful) {
             logger.verbose('Payment canceled')
@@ -41,7 +41,7 @@ function listenToPayments(bot) {
 
         try {
             await savePaymentDiscountFor(tgUser.chatId, payId)
-            await paymentModel.updateOne(
+            await PaymentModel.updateOne(
                 { _id: payId },
                 {
                     $set: {
@@ -51,14 +51,13 @@ function listenToPayments(bot) {
                 }
             )
 
-            tgUser.paymentId = payId
-            await PayedUserModel.create(tgUser.toObject())
+            await PayedUserModel.create({ paymentId: payId, ...tgUser.toObject() })
             bot.telegram.sendMessage(tgUser.chatId, __('pay.success'), {
                 parse_mode: 'Markdown'
             })
         } catch (error) {
             logger.error('Error occured in payment process', { error })
-            paymentModel.updateOne(
+            PaymentModel.updateOne(
                 { _id: payId },
                 {
                     $set: {
