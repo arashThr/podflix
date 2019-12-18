@@ -2,9 +2,9 @@ const express = require('express')
 const redis = require('redis')
 const logger = require('../logger')
 const configs = require('../configs')
-const { irrPaymentModel } = require('../models/paymentModel')
 const { ObjectId } = require('mongodb')
 const { verifyPayment } = require('./payping')
+const { paymentReturnPageInfo } = require('../common')
 
 const pub = redis.createClient(configs.redisUrl)
 
@@ -22,13 +22,16 @@ router.get(configs.payping.returnPath, async (req, res) => {
         res.sendStatus(404)
         return
     }
-    res.sendStatus(200)
 
-    const payment = await irrPaymentModel.findOne(
-        new ObjectId(clientRefId)
-    )
-
-    const verified = await verifyPayment(payment.amount, refId)
+    const verified = await verifyPayment(new ObjectId(clientRefId), refId)
+    if (verified) {
+        res.render('stripe-success', {
+            session: { clientRefId, refId },
+            ...paymentReturnPageInfo
+        })
+    } else {
+        res.render('stripe-canceled', paymentReturnPageInfo)
+    }
 
     pub.publish(
         'payment-verify',

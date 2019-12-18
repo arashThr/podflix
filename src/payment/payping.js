@@ -1,6 +1,7 @@
 const fetch = require('node-fetch')
 const logger = require('../logger')
 const configs = require('../configs')
+const { irrPaymentModel } = require('../models/paymentModel')
 
 async function getPaymentCode(payload) {
     const paymentBody = JSON.stringify(payload)
@@ -32,7 +33,9 @@ async function getPaymentLink(payload) {
     return null
 }
 
-async function verifyPayment(amount, refId) {
+async function verifyPayment(clientRefId, refId) {
+    const payment = await irrPaymentModel.findOne(clientRefId)
+    const amount = payment.amount
     const verifyBody = JSON.stringify({
         amount,
         refId: refId

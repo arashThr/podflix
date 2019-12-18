@@ -23,7 +23,8 @@
     "canceled-title": "Canceled",
     "go-back-btn": "Return to bot",
     "success-pay": "Payment done",
-    "success-title": "Pay Success"
+    "success-title": "Pay Success",
+    "title": "Payment title"
   },
   "start": {
     "about": "About us",
@@ -38,6 +39,7 @@
   },
   "user-menu": {
     "badge-btn": "badge",
+    "badges": "Get badges",
     "ep-fetch-error": "Error occured",
     "episodes-list": "Here are the episodes:\n\n%s",
     "eps-list-btn": "All eps",

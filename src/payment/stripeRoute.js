@@ -3,6 +3,7 @@ const logger = require('../logger')
 const stripe = require('stripe')(configs.stripe.secret)
 const express = require('express')
 const redis = require('redis')
+const { paymentReturnPageInfo } = require('../common')
 
 const pub = redis.createClient(configs.redisUrl)
 
@@ -29,11 +30,7 @@ router.get('/success', async (req, res) => {
         const sessionJSON = JSON.stringify(session, null, 2)
         res.render('stripe-success', {
             session: sessionJSON,
-            successTitle: __('site.success-title'),
-            successDesc: __('site.success-pay'),
-            goToBot: __('site.go-back-btn'),
-            botUrl: configs.botUrl,
-            isInDev: configs.isInDev
+            ...paymentReturnPageInfo
         })
 
         pub.publish(
@@ -59,13 +56,7 @@ router.get('/canceled', async (req, res) => {
         })
     )
 
-    res.render('stripe-canceled', {
-        cancelTitle: __('site.canceled-title'),
-        cancelDesc: __('site.canceled-pay'),
-        goToBot: __('site.go-back-btn'),
-        botUrl: configs.botUrl,
-        isInDev: configs.isInDev
-    })
+    res.render('stripe-canceled', paymentReturnPageInfo)
 })
 
 // Webhook handler for asynchronous events.

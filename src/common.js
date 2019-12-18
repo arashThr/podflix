@@ -1,3 +1,5 @@
+const configs = require('./configs')
+
 function toFarsiNumber(n) {
     const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
     return n
@@ -15,6 +17,16 @@ const epNameLength = 6
 module.exports = {
     EP_NAME_LENGTH: epNameLength,
     epNameRegex: new RegExp(`^\/(ep_[a-z0-9]{${epNameLength}})$`),
+    paymentReturnPageInfo: {
+        title: __('site.title'),
+        successTitle: __('site.success-title'),
+        successDesc: __('site.success-pay'),
+        cancelTitle: __('site.canceled-title'),
+        cancelDesc: __('site.canceled-pay'),
+        goToBot: __('site.go-back-btn'),
+        botUrl: configs.botUrl,
+        isInDev: configs.isInDev
+    },
     getUserFrom(tgUser) {
         return {
             chatId: tgUser.id,
