@@ -37,7 +37,8 @@ router.get('/success', async (req, res) => {
             'payment-verify',
             JSON.stringify({
                 clientRefId: session.client_reference_id,
-                successful: true
+                successful: true,
+                extra: session
             })
         )
     } catch (err) {

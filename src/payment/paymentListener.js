@@ -14,7 +14,7 @@ const sub = redis.createClient(configs.redisUrl)
 function listenToPayments(bot) {
     sub.on('message', async (channel, message) => {
         // Todo: get ref id of payment
-        const { clientRefId, successful } = JSON.parse(message)
+        const { clientRefId, successful, extra } = JSON.parse(message)
         logger.verbose(
             `New message for ${channel}, clientRefId(payId): ${clientRefId}, successful: ${successful}`
         )
@@ -45,6 +45,7 @@ function listenToPayments(bot) {
                 { _id: payId },
                 {
                     $set: {
+                        extra,
                         updated: new Date(),
                         status: paymentState.successful
                     }

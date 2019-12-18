@@ -25,7 +25,7 @@ const paymentSchema = new mongoose.Schema(
             realName: String
         },
         amount: Number,
-        refId: String // Todo: Make it required
+        extra: Object
     },
     { discriminatorKey: 'currency' }
 )

@@ -37,7 +37,8 @@ router.get(configs.payping.returnPath, async (req, res) => {
         'payment-verify',
         JSON.stringify({
             clientRefId,
-            successful: verified
+            successful: verified,
+            extra: { refId }
         })
     )
 })
