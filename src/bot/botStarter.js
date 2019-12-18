@@ -17,6 +17,7 @@ const paymentWizard = require('./paymentWizard')
 const userMenuScene = require('./userMenu')
 const discountScene = require('./discountScene')
 const { UserModel } = require('../models/userModel')
+const DiscountModel = require('../models/discountModel')
 const listenToPayments = require('../payment/paymentListener')
 
 const menuKeys = Markup.keyboard([
@@ -70,7 +71,9 @@ function initBot(bot) {
 
     if (configs.isInDev) {
         bot.command('clear', async ctx => {
-            await UserModel.deleteOne({ chatId: ctx.from.id })
+            const chatId = ctx.from.id
+            await UserModel.deleteOne({ chatId })
+            await DiscountModel.deleteOne({ chatId })
             ctx.reply('User dropped')
         })
     }
