@@ -36,24 +36,12 @@ async function start() {
     }
     initBot(bot)
 
-    // The reason to seperate these two is that in production I want to be able to serve
-    // web pages on 443 port. On other ports there might be problems, enforced by VPN
-    // I can emulate the same sitation in dev env, because I can only get one URL from ngrok
-    if (configs.isInDev) {
-        const secretPath = '/podflixbot/' + crypto.randomBytes(32).toString('hex')
-        app.use(bot.webhookCallback(secretPath))
-        bot.telegram.setWebhook(`${configs.serverUrl}:${configs.serverPort}${secretPath}`)
-    } else {
-        bot.launch({
-            webhook: {
-                domain: `${configs.serverUrl}:${configs.serverPort}`,
-                port: configs.botPort
-            }
-        })
-    }
-    console.log('Launching server ...')
-    const port = configs.isInDev ? configs.botPort : configs.httpPort
-    app.listen(port, () => console.log(`Payment server start on port ${port}!`))
+    const secretPath = '/podflixbot/' + crypto.randomBytes(32).toString('hex')
+    app.use(bot.webhookCallback(secretPath))
+    bot.telegram.setWebhook(`${configs.serverUrl}:${configs.serverPort}${secretPath}`)
+
+    const port = configs.botPort
+    app.listen(port, () => console.log(`Server started on port ${port}!`))
 }
 
 function initPaymentServer(app) {

@@ -11,8 +11,8 @@ if (result.error) {
 const configs = {
     botLang: process.env.BOT_LANG || 'en',
     fakePayment: process.env.FAKE_PAYMENT || false,
-    httpPort: 8000, // Port for internal HTTP server
     botPort: 3000,
+    serverPort: 443, // you may want to use 8443 in production
     serverUrl: process.env.SERVER_URL,
     botUrl: process.env.BOT_URL,
     isInDev: (process.env.NODE_ENV || 'development') === 'development',
@@ -35,8 +35,6 @@ const configs = {
         coverImage: 'https://telegra.ph/file/6d4e6b24bd97dae0d5d25.jpg'
     }
 }
-
-configs.serverPort = configs.isInDev ? 443 : 8443 // ngrok vs production
 
 configs.payping = {
     server: process.env.PAYPING_SERVER || 'https://api.payping.ir',
