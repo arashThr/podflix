@@ -57,10 +57,16 @@ async function isExceedingAvailableCodes(discount) {
 }
 
 function readPromoCodes() {
+    const discounts = []
+
     const discountFilePath = path.join(process.cwd(), 'data', 'promo.txt')
+    if (!fs.existsSync(discountFilePath)) {
+        logger.info('No promo code file found at ' + discountFilePath)
+        return discounts
+    }
+
     const discountFile = fs.readFileSync(discountFilePath, 'utf8')
     const lines = discountFile.split('\n')
-    const discounts = []
 
     for (const line of lines) {
         const l = line.trim()
