@@ -13,7 +13,7 @@ const configs = {
     fakePayment: process.env.FAKE_PAYMENT || false,
     botPort: 3000,
     serverPort: 443, // you may want to use 8443 in production
-    serverUrl: process.env.SERVER_URL,
+    serverUrl: process.env.SERVER_URL || 'https://bot.atomicwarseries.com',
     botUrl: process.env.BOT_URL,
     isInDev: (process.env.NODE_ENV || 'development') === 'development',
     logLevel: process.env.LOG_LEVEL || 'info',
@@ -22,7 +22,7 @@ const configs = {
     dbName: process.env.DB_NAME || 'podflix',
 
     admin: {
-        chatId: process.env.ADMIN_CHAT_ID,
+        chatIds: process.env.ADMINS_CHAT_IDS,
         pass: process.env.ADMIN_PASS || 'dw2!3rS%s',
         disableLoginWithPass: false
     },

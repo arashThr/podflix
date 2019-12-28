@@ -2,8 +2,9 @@ const Scene = require('telegraf/scenes/base')
 const logger = require('../logger')
 const configs = require('../configs')
 
-const defaultAdmin = configs.admin.chatId
-const adminsId = defaultAdmin ? [String(defaultAdmin)] : []
+const adminsId = configs.admin.chatIds
+    ? configs.admin.chatIds.trim().split(' ').map(x => parseInt(x))
+    : []
 const bannedUsers = []
 
 const loginScene = new Scene('login')
