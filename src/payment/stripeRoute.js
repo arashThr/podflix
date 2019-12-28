@@ -15,6 +15,19 @@ const payPath = '/pay'
 const fakePath = '/fake'
 const stripePath = `${configs.serverUrl}${configs.stripe.route}`
 
+router.use(
+    express.json({
+        // We need the raw body to verify webhook signatures.
+        // Let's compute it only when hitting the Stripe webhook endpoint.
+        // More info on https://stripe.com/docs/payments/checkout/one-time
+        verify: function(req, res, buf) {
+            if (req.originalUrl.startsWith(`${configs.stripe.route}${webhookPath}`)) {
+                req.rawBody = buf.toString()
+            }
+        }
+    })
+)
+
 router.get(`${payPath}/:sessionId`, async (req, res) => {
     const sessionId = req.params.sessionId
     res.render('stripe-checkout', {
@@ -25,10 +38,9 @@ router.get(`${payPath}/:sessionId`, async (req, res) => {
 
 router.get('/success', async (req, res) => {
     const sessionId = req.query.session_id
+    logger.debug('Success called. Session id is: ' + sessionId)
     try {
         const info = paymentReturnPageInfo()
-        if (configs.isInDev)
-            await anounceSuccessPay(sessionId)
         res.render('stripe-success', info)
     } catch (err) {
         logger.error('Rendering success page failed', { err })
@@ -49,25 +61,48 @@ router.get('/canceled', async (req, res) => {
     res.render('stripe-canceled', paymentReturnPageInfo())
 })
 
-// Webhook handler for asynchronous events.
 router.post(webhookPath, async (req, res) => {
-    // Todo: This is where we're sure payment occured
-    const data = req.body.data
-    const eventType = req.body.type
+    let data
+    let eventType
 
-    logger.verbose('Webhook called')
-    if (eventType === 'checkout.session.completed') {
-        logger.info('🔔  Payment received!', data)
+    if (configs.stripe.webhookSecret) {
+        let event
+        const signature = req.headers['stripe-signature']
         try {
-            anounceSuccessPay(data.id)
+            event = stripe.webhooks.constructEvent(
+                req.rawBody,
+                signature,
+                configs.stripe.webhookSecret
+            )
+            data = event.data
+            eventType = event.type
         } catch (err) {
-            logger.error('Error when fetching Checkout session', { err })
+            logger.error('Webhook signature verification failed.', { data })
+            return res.sendStatus(400)
         }
+    } else {
+        data = req.body.data
+        eventType = req.body.type
+    }
+
+    if (eventType === 'checkout.session.completed') {
+        const session = data.object
+        logger.info('🔔 Payment received for ', session.client_reference_id)
+        logger.debug('Payment info:', data)
+        pub.publish(
+            'payment-verify',
+            JSON.stringify({
+                clientRefId: session.client_reference_id,
+                successful: true,
+                extra: session
+            })
+        )
     }
 
     res.sendStatus(200)
 })
 
+// Fake payment
 if (configs.isInDev && configs.fakePayment) {
     router.get(`${fakePath}/:clientRefId`, async (req, res) => {
         res.send('Fake Success')
@@ -80,22 +115,6 @@ if (configs.isInDev && configs.fakePayment) {
             })
         )
     })
-}
-
-async function anounceSuccessPay(sessionId) {
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
-    if (configs.isInDev) {
-        const sessionJSON = JSON.stringify(session, null, 2)
-        logger.debug(sessionJSON)
-    }
-    pub.publish(
-        'payment-verify',
-        JSON.stringify({
-            clientRefId: session.client_reference_id,
-            successful: true,
-            extra: session
-        })
-    )
 }
 
 async function getStripeSessionId(amount, clientRefId) {

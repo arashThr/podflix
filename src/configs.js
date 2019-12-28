@@ -46,6 +46,7 @@ configs.payping = {
 configs.stripe = {
     secret: process.env.STRIPE_SECRET,
     public: process.env.STRIPE_PUBLIC,
+    webhookSecret: process.env.WEBHOOK_SECRET,
     route: '/stripe'
 }
 
