@@ -45,20 +45,21 @@ function initBot(bot) {
     bot.start(botStart)
 
     bot.command('login', enter('login'))
-    bot.command('promo', enter('discount-scene'))
     bot.hears(__('start.buy-btn'), enter('payment-wizard'))
 
     bot.hears(__('start.teaser-btn'), ctx => {
         redisClient.get(Commons.teaserKey, (err, fileId) => {
             if (err) logger.error('Getting teaser failed', { err })
-            else ctx.replyWithVideo(fileId, { caption: __('start.teaser') })
+            else if (fileId) ctx.replyWithVideo(fileId, { caption: __('start.teaser') })
+            else ctx.reply('Not available')
         })
     })
 
     bot.hears(__('start.ep0-btn'), ctx => {
         redisClient.get(Commons.ep0Key, (err, fileId) => {
             if (err) logger.error('Getting teaser failed', { err })
-            else ctx.replyWithAudio(fileId, { caption: __('start.ep0') })
+            else if (fileId) ctx.replyWithAudio(fileId, { caption: __('start.ep0') })
+            else ctx.reply('Not available')
         })
     })
 
@@ -79,6 +80,8 @@ function initBot(bot) {
     }
     // For support
     bot.command('getId', ctx => ctx.reply(`You chat id is: ${ctx.from.id}`))
+    // In case all other middlewares fail, call bot start
+    bot.use(botStart)
 }
 
 async function botStart(ctx) {
