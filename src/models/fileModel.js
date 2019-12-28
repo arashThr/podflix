@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const fileSchema = new mongoose.Schema({
     epKey: String,
     fileId: String,
-    name: String,
+    fileName: String,
     caption: { type: String, default: '' },
     size: Number
 })

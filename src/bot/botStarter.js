@@ -63,10 +63,10 @@ function initBot(bot) {
     })
 
     bot.hears(__('start.about-btn'), ({ reply }) =>
-        returnMd(reply, __('start.about'))
+        reply(__('start.about'), { parse_mode: 'Markdown' })
     )
     bot.hears(__('start.creators-btn'), ({ reply }) =>
-        returnMd(reply, __('start.creators'))
+        reply(__('start.creators'), { parse_mode: 'Markdown' })
     )
 
     if (configs.isInDev) {
@@ -79,10 +79,6 @@ function initBot(bot) {
     }
     // For support
     bot.command('getId', ctx => ctx.reply(`You chat id is: ${ctx.from.id}`))
-}
-
-function returnMd(reply, text) {
-    return reply(text, menuKeys)
 }
 
 async function botStart(ctx) {

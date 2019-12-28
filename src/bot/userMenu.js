@@ -28,7 +28,7 @@ userMenuScene.action('user-menu', async ctx => {
 userMenuScene.hears(__('user-menu.eps-list-btn'), async ctx => {
     const episodes = await FileModel.find()
     const list = episodes
-        .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.caption}\n\n`, '')
+        .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.fileName}\n\n`, '')
         .trim()
     ctx.reply(
         __('user-menu.episodes-list', list),

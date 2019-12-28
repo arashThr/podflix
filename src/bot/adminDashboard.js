@@ -52,7 +52,7 @@ dashboardScene.action(Commons.ep0Key, async ctx => {
 })
 
 dashboardScene.action('exit-dashboard', ctx => {
-    ctx.editMessageText('Good byy admin. Press /start or /login')
+    ctx.editMessageText('Good bye admin. Press /start or /login')
     ctx.scene.leave()
 })
 
@@ -65,7 +65,7 @@ dashboardScene.action('show-files', async ctx => {
 
     let episodes = ''
     for (const file of files) {
-        episodes += `/${file.epKey} : ${file.name}\n`
+        episodes += `/${file.epKey} : ${file.fileName}\n`
     }
 
     ctx.editMessageText(episodes, goHomeButton())
@@ -78,7 +78,7 @@ dashboardScene.hears(Commons.epNameRegex, async ctx => {
     const fileInfo = await FileModel.findOne({ epKey })
     ctx.reply(
         `🗃
-name: ${fileInfo.name}
+name: ${fileInfo.fileName}
 caption: ${fileInfo.caption}`,
         goHomeButton([Markup.callbackButton('Remove', 'remove-file')])
     )
@@ -135,11 +135,13 @@ dashboardScene.on('message', async ctx => {
             .toString(36)
             .substring(2, 2 + Commons.EP_NAME_LENGTH)
 
+    const caption = ctx.message.caption || 'No caption'
+    const fileName = doc.title || caption.substr(0, 20) + (caption.length > 20 ? '...' : '')
     const fileInfo = {
         epKey,
+        fileName,
+        caption,
         fileId: doc.file_id,
-        name: doc.file_name,
-        caption: ctx.message.caption || doc.file_name,
         size: doc.file_size
     }
     const op = await FileModel.create(fileInfo)
@@ -175,7 +177,7 @@ async function broadcastNewFile(ctx, fileInfo) {
             await ctx.telegram.sendDocument(chatId,
                 fileInfo.fileId,
                 {
-                    caption: 'New episode released!\n' + fileInfo.caption,
+                    caption: __('user-menu.new-ep') + '\n' + fileInfo.caption,
                     reply_markup: Markup.inlineKeyboard([
                         Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
                     ])
