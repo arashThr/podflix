@@ -45,6 +45,11 @@
   },
   "user-menu": {
     "badge-btn": "badge",
+    "badge": {
+      "insta-post": "Insta post",
+      "insta-story": "Insta story",
+      "twitter": "Twitter"
+    },
     "badges": "Get badges",
     "ep-fetch-error": "Error occured",
     "episodes-list": "Here are the episodes:\n\n%s",

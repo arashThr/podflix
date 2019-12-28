@@ -55,6 +55,36 @@ userMenuScene.hears(__('user-menu.last-ep-btn'), async ctx => {
     }
 })
 
+userMenuScene.hears(__('user-menu.badge-btn'), ctx => {
+    ctx.reply(
+        __('user-menu.badges'),
+        Markup.inlineKeyboard([
+            [
+                Markup.callbackButton(__('user-menu.badge.insta-post'), 'insta-post'),
+                Markup.callbackButton(__('user-menu.badge.insta-story'), 'insta-story')
+            ],
+            [
+                Markup.callbackButton(__('user-menu.badge.twitter'), 'twitter')
+            ]
+        ]).extra({ parse_mode: 'Markdown' })
+    )
+})
+
+userMenuScene.action('twitter', ctx => {
+    ctx.answerCbQuery()
+    ctx.replyWithPhoto('https://telegra.ph/file/a233ca5e094d3922175e2.jpg')
+})
+
+userMenuScene.action('insta-post', ctx => {
+    ctx.answerCbQuery()
+    ctx.replyWithPhoto('https://telegra.ph/file/2956cf191282c5adb15eb.jpg')
+})
+
+userMenuScene.action('insta-story', ctx => {
+    ctx.answerCbQuery()
+    ctx.replyWithPhoto('https://telegra.ph/file/28cecf1cec69ed910d34b.jpg')
+})
+
 userMenuScene.command('exit', async ctx => {
     ctx.reply(__('user-menu.exit'))
     ctx.scene.leave()
