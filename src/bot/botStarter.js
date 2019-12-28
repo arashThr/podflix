@@ -70,16 +70,16 @@ function initBot(bot) {
         reply(__('start.creators'), { parse_mode: 'Markdown' })
     )
 
-    if (configs.isInDev) {
-        bot.command('clear', async ctx => {
-            const chatId = ctx.from.id
-            await UserModel.deleteOne({ chatId })
-            await DiscountModel.deleteOne({ chatId })
-            ctx.reply('User dropped')
-        })
-    }
+    bot.command('clearAccount', async ctx => {
+        const chatId = ctx.from.id
+        await UserModel.deleteOne({ chatId })
+        await DiscountModel.deleteOne({ chatId })
+        ctx.reply('User dropped')
+    })
+
     // For support
     bot.command('getId', ctx => ctx.reply(`You chat id is: ${ctx.from.id}`))
+
     // In case all other middlewares fail, call bot start
     bot.use(botStart)
 }
