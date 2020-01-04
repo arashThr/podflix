@@ -121,7 +121,8 @@ dashboardScene.on('message', async ctx => {
         )
     }
     if (state === dashboardState.TEASER || state === dashboardState.EP0) {
-        redisClient.set(state, doc.file_id, err => {
+        const caption = ctx.message.caption || ''
+        redisClient.hmset(state, 'fileId', doc.file_id, 'caption', caption, err => {
             if (err) logger.error('Error in setting teaser file', { err })
             ctx.reply(err ? 'Failed' : 'ok', goHomeButton())
         })

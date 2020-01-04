@@ -23,7 +23,7 @@ async function initDb() {
 
 const redisClient = redis.createClient()
 redisClient.on('error', err => {
-    logger.error('Redis start failed', { err })
+    logger.error('Erros in Redis', { err })
     process.exit()
 })
 

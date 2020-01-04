@@ -3,7 +3,6 @@ const Markup = require('telegraf/markup')
 const Stage = require('telegraf/stage')
 const { enter } = Stage
 
-const configs = require('../configs')
 const logger = require('../logger')
 const Commons = require('../common')
 const { redisClient } = require('../db')
@@ -48,18 +47,27 @@ function initBot(bot) {
     bot.hears(__('start.buy-btn'), enter('payment-wizard'))
 
     bot.hears(__('start.teaser-btn'), ctx => {
-        redisClient.get(Commons.teaserKey, (err, fileId) => {
+        redisClient.hgetall(Commons.teaserKey, (err, teaserInfo) => {
             if (err) logger.error('Getting teaser failed', { err })
-            else if (fileId) ctx.replyWithVideo(fileId, { caption: __('start.teaser') })
-            else ctx.reply('Not available')
+            else if (!teaserInfo || !teaserInfo.fileId)
+                ctx.reply('Not available')
+            else
+                ctx.replyWithVideo(teaserInfo.fileId, {
+                    caption: teaserInfo.caption || __('start.teaser'),
+                    parse_mode: 'Markdown'
+                })
         })
     })
 
     bot.hears(__('start.ep0-btn'), ctx => {
-        redisClient.get(Commons.ep0Key, (err, fileId) => {
+        redisClient.hgetall(Commons.ep0Key, (err, ep0Info) => {
             if (err) logger.error('Getting teaser failed', { err })
-            else if (fileId) ctx.replyWithAudio(fileId, { caption: __('start.ep0') })
-            else ctx.reply('Not available')
+            else if (!ep0Info || !ep0Info.fileId) ctx.reply('Not available')
+            else
+                ctx.replyWithAudio(ep0Info.fileId, {
+                    caption: ep0Info.caption || __('start.ep0'),
+                    parse_mode: 'Markdown'
+                })
         })
     })
 
@@ -93,7 +101,11 @@ async function botStart(ctx) {
     if (user) {
         ctx.scene.enter('user-menu-scene')
     } else {
-        await ctx.reply(__('start.unknown-user'), menuKeys)
+        try {
+            await ctx.reply(__('start.unknown-user'), menuKeys)
+        } catch (err) {
+            logger.error('Error sending message to unknown user', err)
+        }
     }
 }
 
