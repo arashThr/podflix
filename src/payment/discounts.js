@@ -10,7 +10,7 @@ async function applyDiscount(chatId, code) {
     if (alreadyApplied) return { reason: 'code alreay applied' }
     try {
         const discounts = readPromoCodes()
-        const discount = discounts.find(d => d.code === code)
+        const discount = discounts.find(d => d.code === code.toLowerCase())
         if (!discount) {
             return { reason: 'code does not exist' }
         }
@@ -77,10 +77,10 @@ function readPromoCodes() {
         const result = pat.exec(l)
         if (result) {
             discounts.push({
-                dollarPrice: Number(result.groups.dollar),
-                toomanPrice: Number(result.groups.tooman),
+                dollarPrice: parseInt(result.groups.dollar),
+                toomanPrice: parseInt(result.groups.tooman),
                 times: result.groups.times,
-                code: result.groups.code
+                code: (result.groups.code).toLowerCase()
             })
         }
     }
