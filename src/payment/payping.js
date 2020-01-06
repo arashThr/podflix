@@ -27,7 +27,7 @@ async function getPaymentCode(payload) {
 
 async function getPaymentLink(payload) {
     payload.returnUrl = `${configs.serverUrl}${configs.payping.route}${configs.payping.returnPath}`
-    payload.description = 'Podflix payment'
+    payload.description = __('pay.payload-desc')
     const code = await getPaymentCode(payload)
     if (code) return `${configs.payping.server}/v1/pay/gotoipg/${code}`
     return null

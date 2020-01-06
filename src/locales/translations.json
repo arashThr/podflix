@@ -7,8 +7,10 @@
   "pay": {
     "canceled": "Canceled",
     "failed": "Failed",
+    "link-failed": "Getting link failed",
     "pay-btn": "go to pay",
     "pay-method": "Are you in Iran?",
+    "payload-desc": "Buying the series",
     "payment-desc": "Click to pay with payping",
     "payping-btn": "Yes",
     "promo-code-btn": "Promo code",

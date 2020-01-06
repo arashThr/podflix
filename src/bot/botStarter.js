@@ -104,7 +104,7 @@ async function botStart(ctx) {
         try {
             await ctx.reply(__('start.unknown-user'), menuKeys)
         } catch (err) {
-            logger.error('Error sending message to unknown user', err)
+            logger.debug('Error sending message to unknown user', err)
         }
     }
 }
