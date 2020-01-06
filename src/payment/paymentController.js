@@ -2,6 +2,7 @@ const configs = require('../configs')
 const logger = require('../logger')
 
 const { getPaymentLink } = require('./payping')
+const { getZarinpalPaymentLink } = require('./zarinpalRoute')
 const { getStripePaymentLink } = require('./stripeRoute')
 
 const { findDiscountFor } = require('./discounts')
@@ -43,7 +44,20 @@ async function createStripePayment(tgUser) {
     return link
 }
 
+async function createZarinpalPayment(tgUser) {
+    const amount = await getToomanAmount(tgUser.chatId)
+    const payment = await irrPaymentModel.create({ amount, tgUser })
+
+    const link = await getZarinpalPaymentLink({
+        amount,
+        clientRefId: payment._id.toString()
+    })
+    logger.debug('Zarinpal payment link: ' + link)
+    return link
+}
+
 module.exports = {
     createStripePayment,
+    createZarinpalPayment,
     createPaypingPayment
 }

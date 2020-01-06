@@ -50,6 +50,11 @@ configs.stripe = {
     route: '/stripe'
 }
 
+configs.zarinpal = {
+    merchantId: process.env.ZARINPAL_MERCHANTID,
+    route: '/zarinpal'
+}
+
 i18n.configure({
     locales: ['translations', 'translations_fa'],
     directory: path.join(__dirname, 'locales'),

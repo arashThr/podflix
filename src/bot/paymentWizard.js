@@ -11,7 +11,7 @@ const {
     findDiscountFor
 } = require('../payment/discounts')
 const {
-    createPaypingPayment,
+    createZarinpalPayment,
     createStripePayment
 } = require('../payment/paymentController')
 
@@ -28,7 +28,7 @@ function showPaymentOptions(reply) {
 
 function getPaymentsFuncs(isUSD, discount) {
     const { dollarPrice, toomanPrice } = discount || {}
-    const createPayment = isUSD ? createStripePayment : createPaypingPayment
+    const createPayment = isUSD ? createStripePayment : createZarinpalPayment
     const priceString = isUSD
         ? Commons.getDollarString(dollarPrice || configs.app.dollarPrice)
         : Commons.getToomanString(toomanPrice || configs.app.toomanPrice)

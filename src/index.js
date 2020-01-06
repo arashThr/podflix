@@ -10,7 +10,7 @@ const { initBot } = require('./bot/botStarter')
 const { initDb } = require('./db')
 
 const { stripeRouter } = require('./payment/stripeRoute')
-const { paypingRouter } = require('./payment/paypingRoute')
+const { zarinpalRouter } = require('./payment/zarinpalRoute')
 
 async function start() {
     if (!configs.isInDev && configs.sentryDSN)
@@ -48,7 +48,7 @@ function initPaymentServer(app) {
     app.set('view engine', 'ejs')
     app.set('views', path.join(__dirname, './payment/views'))
 
-    app.use(configs.payping.route, paypingRouter)
+    app.use(configs.zarinpal.route, zarinpalRouter)
     app.use(configs.stripe.route, stripeRouter)
     app.use('/assets', express.static(path.join(__dirname, './payment/public')))
 }
