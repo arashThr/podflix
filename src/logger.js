@@ -2,19 +2,21 @@ const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, prettyPrint } = format
 const configs = require('./configs')
 
+const logsDir = 'logs'
+
 const logger = createLogger({
     format: combine(timestamp(), prettyPrint()),
     transports: [
         new transports.File({
-            filename: 'data/info.log',
+            filename: logsDir + '/info.log',
             level: 'info'
         }),
         new transports.File({
-            filename: 'data/errors.log',
+            filename: logsDir + '/errors.log',
             level: 'error'
         }),
         new transports.File({
-            filename: 'data/all.log',
+            filename: logsDir + '/all.log',
             level: 'debug'
         })
     ]
