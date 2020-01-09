@@ -16,7 +16,7 @@ async function initDb() {
         db.on('error', console.error.bind(console, 'MongoDB connection error:'))
         return db
     } catch (err) {
-        logger.error(err)
+        logger.error('Connecting to db failed', { err })
         throw err
     }
 }

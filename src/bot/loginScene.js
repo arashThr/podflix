@@ -20,7 +20,7 @@ loginScene.enter(ctx => {
         ctx.scene.leave()
         return
     }
-    logger.info('Admin loggin in')
+    logger.info('Admin loggin in', { tgUser: ctx.from })
     ctx.session.loginAttempt = 0
     ctx.reply('Welcome. Enter pass')
 })

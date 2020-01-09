@@ -38,7 +38,7 @@ async function verifyPayment(clientRefId, refId) {
     const amount = payment.amount
     const verifyBody = JSON.stringify({
         amount,
-        refId: refId
+        refId
     })
     const resp = await fetch(`${configs.payping.server}/v1/pay/verify`, {
         method: 'POST',
@@ -50,7 +50,7 @@ async function verifyPayment(clientRefId, refId) {
     })
 
     if (resp.status === 200) {
-        logger.debug('Payment verifed')
+        logger.debug('PayPing payment verifed', { refId, clientRefId })
     } else if (resp.status === 400) {
         logger.debug('Payment canceled')
     } else {

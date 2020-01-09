@@ -18,11 +18,12 @@ async function applyDiscount(chatId, code) {
             return { reason: 'code is no longer' }
         }
         const result = await saveDiscountForUser(discount, chatId)
+        logger.info('Discount applied', { code, chatId, discount, result })
         return {
             discountId: result._id, isFree: isFreeAccessCode(discount)
         }
     } catch (err) {
-        logger.error('Proccessing discount file failed', { err })
+        logger.error('Proccessing discount file failed', { err, code, chatId })
         return { reason: 'code: Error occured' }
     }
 }

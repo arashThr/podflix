@@ -114,7 +114,7 @@ dashboardScene.on('message', async ctx => {
     if (state === dashboardState.MAIN_MENU) return
     const doc = ctx.message.audio || ctx.message.video
     if (!doc) {
-        logger.warn('File is not Audio nor Video!')
+        logger.warn('File is not Audio nor Video!', { doc })
         return ctx.reply(
             'This is not a file. Try again or hit back',
             goHomeButton()
@@ -123,7 +123,7 @@ dashboardScene.on('message', async ctx => {
     if (state === dashboardState.TEASER || state === dashboardState.EP0) {
         const caption = ctx.message.caption || ''
         redisClient.hmset(state, 'fileId', doc.file_id, 'caption', caption, err => {
-            if (err) logger.error('Error in setting teaser file', { err })
+            if (err) logger.error('Error in setting teaser file', { doc, err })
             ctx.reply(err ? 'Failed' : 'ok', goHomeButton())
         })
         return
@@ -147,11 +147,11 @@ dashboardScene.on('message', async ctx => {
     }
     const op = await FileModel.create(fileInfo)
     if (!op.errors) {
-        logger.info('File added')
+        logger.info('File added', { doc })
         try {
             broadcastNewFile(ctx, fileInfo)
         } catch (err) {
-            logger.error('Broadcasting file failed', { err })
+            logger.error('Broadcasting file failed', { doc, err })
             return
         }
         ctx.reply('Send another or hit back', goHomeButton())
@@ -168,6 +168,7 @@ async function broadcastNewFile(ctx, fileInfo) {
     // Todo: Projection is not working
     const usersChatIds = await PayedUserModel.find({}, { chatId: 1 })
 
+    logger.info('Broadcasting file', { fileInfo })
     function sendFile(chatIds, i = 0) {
         setTimeout(async () => {
             if (i >= chatIds.length) {

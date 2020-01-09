@@ -18,7 +18,7 @@ router.get(configs.payping.returnPath, async (req, res) => {
     logger.info(`Return URL called - Ref: ${refId}, clientId: ${clientRefId}`)
 
     if (!ObjectId.isValid(clientRefId)) {
-        logger.error('Object id is not valid: ', clientRefId)
+        logger.error('Object id is not valid: ', { clientRefId, refId })
         res.sendStatus(404)
         return
     }

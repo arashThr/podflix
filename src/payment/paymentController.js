@@ -28,7 +28,7 @@ async function createPaypingPayment(tgUser) {
         amount,
         clientRefId: payment._id.toString()
     })
-    logger.debug('Payping payment link: ' + link)
+    logger.verbose('Payping payment link: ' + link)
     return link
 }
 
@@ -40,7 +40,7 @@ async function createStripePayment(tgUser) {
         amount,
         clientRefId: payment._id.toString()
     })
-    logger.debug('Stripe payment link: ' + link)
+    logger.verbose('Stripe payment link: ' + link)
     return link
 }
 
@@ -52,7 +52,7 @@ async function createZarinpalPayment(tgUser) {
         amount,
         clientRefId: payment._id.toString()
     })
-    logger.debug('Zarinpal payment link: ' + link)
+    logger.verbose('Zarinpal payment link: ' + link)
     return link
 }
 

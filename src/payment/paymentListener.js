@@ -20,24 +20,24 @@ function listenToPayments(bot) {
         )
 
         if (!ObjectId.isValid(clientRefId)) {
-            logger.warn('Invalid object id for payId: ', { clientRefId })
+            logger.warn('Invalid object id for payId ' + clientRefId)
             return
         }
         const payId = ObjectId(clientRefId)
 
         const payment = await PaymentModel.findById(payId)
         if (!payment) {
-            logger.warn('No payment found for payId: ', { payId })
+            logger.warn('No payment found for payId ' + payId)
             return
         }
         const tgUser = payment.tgUser
 
         if (!successful) {
-            logger.verbose('Payment canceled')
+            logger.verbose('Payment canceled on payId ', { payId, ...tgUser })
             bot.telegram.sendMessage(tgUser.chatId, __('pay.canceled'))
             return
         }
-        logger.verbose('Payment verifed')
+        logger.verbose('Payment verifed for payId ', { payId, ...tgUser })
 
         try {
             await savePaymentDiscountFor(tgUser.chatId, payId)
@@ -57,7 +57,7 @@ function listenToPayments(bot) {
                 parse_mode: 'Markdown'
             })
         } catch (error) {
-            logger.error('Error occured in payment process', { error })
+            logger.error('Error occured in payment process', { error, ...tgUser })
             PaymentModel.updateOne(
                 { _id: payId },
                 {

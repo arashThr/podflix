@@ -1,22 +1,24 @@
 const { createLogger, format, transports } = require('winston')
-const { combine, timestamp, prettyPrint } = format
+const { combine, timestamp, prettyPrint, simple } = format
 const configs = require('./configs')
 
 const logsDir = 'logs'
 
 const logger = createLogger({
-    format: combine(timestamp(), prettyPrint()),
     transports: [
         new transports.File({
             filename: logsDir + '/info.log',
+            format: combine(timestamp(), simple()),
             level: 'info'
         }),
         new transports.File({
             filename: logsDir + '/errors.log',
+            format: combine(timestamp(), prettyPrint()),
             level: 'error'
         }),
         new transports.File({
             filename: logsDir + '/all.log',
+            format: combine(timestamp(), format.json()),
             level: 'debug'
         })
     ]
@@ -27,9 +29,10 @@ if (configs.isInDev) {
         new transports.Console({
             level: 'debug',
             format: format.combine(
+                timestamp(),
                 format.colorize(),
-                format.simple()
-              )
+                simple()
+            )
         })
     )
 }

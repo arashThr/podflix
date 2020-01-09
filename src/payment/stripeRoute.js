@@ -43,7 +43,7 @@ router.get('/success', async (req, res) => {
         const info = paymentReturnPageInfo()
         res.render('stripe-success', info)
     } catch (err) {
-        logger.error('Rendering success page failed', { err })
+        logger.error('Rendering success page failed', { sessionId, err })
         res.send('Error occured when trying to fetch payment details')
     }
 })
@@ -77,7 +77,7 @@ router.post(webhookPath, async (req, res) => {
             data = event.data
             eventType = event.type
         } catch (err) {
-            logger.error('Webhook signature verification failed.', { data })
+            logger.error('Webhook signature verification failed.', { data, url: req.url })
             return res.sendStatus(400)
         }
     } else {
@@ -87,8 +87,8 @@ router.post(webhookPath, async (req, res) => {
 
     if (eventType === 'checkout.session.completed') {
         const session = data.object
-        logger.info('🔔 Payment received for ', session.client_reference_id)
-        logger.debug('Payment info:', data)
+        logger.info('🔔 Payment received for ' + session.client_reference_id)
+        logger.verbose('Payment info:', { data })
         pub.publish(
             'payment-verify',
             JSON.stringify({

@@ -38,7 +38,7 @@ async function getZarinpalPaymentLink({ amount, clientRefId }) {
             logger.verbose('Zain payment link created', { link })
             return link
         } else {
-            logger.error('Creating zarinpal payment link failed', {
+            logger.warn('Creating zarinpal payment link failed', {
                 err: JSON.stringify(result)
             })
         }
@@ -71,7 +71,7 @@ async function verifyPayment(clientRefId, authority) {
         }
         logger.verbose('zarinpal Transction canceled', { result })
     } catch (err) {
-        logger.error('Error in zarinpal payment verfication', err)
+        logger.error('Error in zarinpal payment verfication', { payment, err })
     }
 }
 
@@ -82,7 +82,7 @@ router.get(`${returnPath}/:clientRefId`, async (req, res) => {
     const Authority = req.query.Authority
 
     if (!ObjectId.isValid(clientRefId)) {
-        logger.error('Object id is not valid: ', clientRefId)
+        logger.error('Object id is not valid', { clientRefId, url: req.url })
         res.sendStatus(404)
         return
     }

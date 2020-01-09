@@ -41,6 +41,12 @@ function initBot(bot) {
     bot.use(session())
     bot.use(stage.middleware())
 
+    bot.catch((err, ctx) => {
+        logger.error(`Ooops, ecountered an bot error for ${ctx.updateType}`, {
+            err,
+            message: ctx.message
+        })
+    })
     bot.start(botStart)
 
     bot.command('login', enter('login'))
@@ -61,7 +67,7 @@ function initBot(bot) {
 
     bot.hears(__('start.ep0-btn'), ctx => {
         redisClient.hgetall(Commons.ep0Key, (err, ep0Info) => {
-            if (err) logger.error('Getting teaser failed', { err })
+            if (err) logger.error('Getting ep0 failed', { err })
             else if (!ep0Info || !ep0Info.fileId) ctx.reply('Not available')
             else
                 ctx.replyWithAudio(ep0Info.fileId, {
@@ -80,6 +86,7 @@ function initBot(bot) {
 
     bot.command('clearAccount', async ctx => {
         const chatId = ctx.from.id
+        logger.info('User is deleting account', { chatId })
         await UserModel.deleteOne({ chatId })
         await DiscountModel.deleteOne({ chatId })
         ctx.reply('User dropped')
@@ -101,11 +108,10 @@ async function botStart(ctx) {
     if (user) {
         ctx.scene.enter('user-menu-scene')
     } else {
-        try {
-            await ctx.reply(__('start.unknown-user'), menuKeys)
-        } catch (err) {
-            logger.debug('Error sending message to unknown user', err)
-        }
+        ctx.reply(__('start.unknown-user'), menuKeys).catch(() => {
+            /* Ignore spams */
+            logger.warn('Error sending message to user', { tgUser })
+        })
     }
 }
 
