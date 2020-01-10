@@ -38,7 +38,7 @@ router.get(`${payPath}/:sessionId`, async (req, res) => {
 
 router.get('/success', async (req, res) => {
     const sessionId = req.query.session_id
-    logger.debug('Success called. Session id is: ' + sessionId)
+    logger.debug('Success called. Session id is: ' + sessionId, { url: req.url })
     try {
         const info = paymentReturnPageInfo()
         res.render('stripe-success', info)
@@ -50,6 +50,7 @@ router.get('/success', async (req, res) => {
 
 router.get('/canceled', async (req, res) => {
     const clientRefId = req.query.clientRefId
+    logger.verbose('Cancel page called', { clientRefId, url: req.url })
     pub.publish(
         'payment-verify',
         JSON.stringify({

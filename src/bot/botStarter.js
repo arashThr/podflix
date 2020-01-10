@@ -52,30 +52,9 @@ function initBot(bot) {
     bot.command('login', enter('login'))
     bot.hears(__('start.buy-btn'), enter('payment-wizard'))
 
-    bot.hears(__('start.teaser-btn'), ctx => {
-        redisClient.hgetall(Commons.teaserKey, (err, teaserInfo) => {
-            if (err) logger.error('Getting teaser failed', { err })
-            else if (!teaserInfo || !teaserInfo.fileId)
-                ctx.reply('Not available')
-            else
-                ctx.replyWithVideo(teaserInfo.fileId, {
-                    caption: teaserInfo.caption || __('start.teaser'),
-                    parse_mode: 'Markdown'
-                })
-        })
-    })
-
-    bot.hears(__('start.ep0-btn'), ctx => {
-        redisClient.hgetall(Commons.ep0Key, (err, ep0Info) => {
-            if (err) logger.error('Getting ep0 failed', { err })
-            else if (!ep0Info || !ep0Info.fileId) ctx.reply('Not available')
-            else
-                ctx.replyWithAudio(ep0Info.fileId, {
-                    caption: ep0Info.caption || __('start.ep0'),
-                    parse_mode: 'Markdown'
-                })
-        })
-    })
+    bot.hears(__('start.teaser-btn'), sendTeaser)
+    bot.hears(__('start.ep0-btn'), sendEp0)
+    bot.command('teaser', sendTeaser)
 
     bot.hears(__('start.about-btn'), ({ reply }) =>
         reply(__('start.about'), { parse_mode: 'Markdown' })
@@ -90,6 +69,9 @@ function initBot(bot) {
         await UserModel.deleteOne({ chatId })
         await DiscountModel.deleteOne({ chatId })
         ctx.reply('User dropped')
+    })
+
+    bot.command('teaser', ctx => {
     })
 
     // For support
@@ -113,6 +95,31 @@ async function botStart(ctx) {
             logger.warn('Error sending message to user', { tgUser })
         })
     }
+}
+
+function sendTeaser(ctx) {
+    redisClient.hgetall(Commons.teaserKey, (err, teaserInfo) => {
+        if (err) logger.error('Getting teaser failed', { err })
+        else if (!teaserInfo || !teaserInfo.fileId)
+            ctx.reply('Not available')
+        else
+            ctx.replyWithVideo(teaserInfo.fileId, {
+                caption: teaserInfo.caption || __('start.teaser'),
+                parse_mode: 'Markdown'
+            })
+    })
+}
+
+function sendEp0(ctx) {
+    redisClient.hgetall(Commons.ep0Key, (err, ep0Info) => {
+        if (err) logger.error('Getting ep0 failed', { err })
+        else if (!ep0Info || !ep0Info.fileId) ctx.reply('Not available')
+        else
+            ctx.replyWithAudio(ep0Info.fileId, {
+                caption: ep0Info.caption || __('start.ep0'),
+                parse_mode: 'Markdown'
+            })
+    })
 }
 
 exports.initBot = initBot
