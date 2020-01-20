@@ -11,7 +11,7 @@ const pub = redis.createClient(configs.redisUrl)
 const router = express.Router()
 
 router.get(configs.payping.returnPath, async (req, res) => {
-    console.log('Payment is done. Return URL called')
+    logger.info('Payment is done. Return URL called')
     const refId = req.query.refid
     const clientRefId = req.query.clientrefid
 

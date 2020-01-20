@@ -8,7 +8,7 @@ const logger = createLogger({
     transports: [
         new transports.File({
             filename: logsDir + '/info.log',
-            format: combine(timestamp(), simple()),
+            format: combine(timestamp(), prettyPrint()),
             level: 'info'
         }),
         new transports.File({
