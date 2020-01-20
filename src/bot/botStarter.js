@@ -66,12 +66,10 @@ function initBot(bot) {
     bot.command('clearAccount', async ctx => {
         const chatId = ctx.from.id
         logger.info('User is deleting account', { chatId })
+        ctx.scene.leave('user-menu-scene')
         await UserModel.deleteOne({ chatId })
         await DiscountModel.deleteOne({ chatId })
         ctx.reply('User dropped')
-    })
-
-    bot.command('teaser', ctx => {
     })
 
     // For support
