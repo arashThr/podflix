@@ -3,6 +3,7 @@ const Markup = require('telegraf/markup')
 const Stage = require('telegraf/stage')
 const { enter } = Stage
 
+const configs = require('../configs')
 const logger = require('../logger')
 const Commons = require('../common')
 const { redisClient } = require('../db')
@@ -65,14 +66,16 @@ function initBot(bot) {
         reply(__('start.creators'), { parse_mode: 'Markdown' })
     )
 
-    bot.command('clearAccount', async ctx => {
-        const chatId = ctx.from.id
-        logger.info('User is deleting account', { chatId })
-        ctx.scene.leave('user-menu-scene')
-        await UserModel.deleteOne({ chatId })
-        await DiscountModel.deleteOne({ chatId })
-        ctx.reply('User dropped')
-    })
+    if (configs.isInDev) {
+        bot.command('clearAccount', async ctx => {
+            const chatId = ctx.from.id
+            logger.info('User is deleting account', { chatId })
+            ctx.scene.leave('user-menu-scene')
+            await UserModel.deleteOne({ chatId })
+            await DiscountModel.deleteOne({ chatId })
+            ctx.reply('User dropped')
+        })
+    }
 
     // For support
     bot.command('getId', ctx => ctx.reply(`You chat id is: ${ctx.from.id}`))
