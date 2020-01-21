@@ -49,6 +49,7 @@ function initPaymentServer(app) {
     app.set('views', path.join(__dirname, './payment/views'))
 
     app.get('/favicon.ico', (req, res) => res.status(204))
+    app.get('/zarinpal-done/favicon.ico', (req, res) => res.status(204))
     app.use(configs.zarinpal.route, zarinpalRouter)
     app.use(configs.stripe.route, stripeRouter)
     app.use('/assets', express.static(path.join(__dirname, './payment/public')))
