@@ -5,16 +5,32 @@ const configs = require('./configs')
 
 const logsDir = 'logs/'
 
+const timezonedTime = () => {
+    return new Date().toLocaleString('en-US', {
+        timeZone: 'Asia/Tehran'
+    })
+}
+
 const logger = createLogger({
     transports: [
         new transports.File({
             filename: logsDir + 'info.log',
-            format: combine(timestamp(), prettyPrint()),
+            format: combine(
+                timestamp({
+                    format: timezonedTime
+                }),
+                prettyPrint()
+            ),
             level: 'info'
         }),
         new transports.File({
             filename: logsDir + 'errors.log',
-            format: combine(timestamp(), prettyPrint()),
+            format: combine(
+                timestamp({
+                    format: timezonedTime
+                }),
+                prettyPrint()
+            ),
             level: 'error'
         }),
         new transports.DailyRotateFile({
@@ -23,7 +39,12 @@ const logger = createLogger({
             zippedArchive: true,
             maxSize: '20m',
             maxFiles: '14d',
-            format: combine(timestamp(), format.json()),
+            format: combine(
+                timestamp({
+                    format: timezonedTime
+                }),
+                format.json()
+            ),
             level: 'debug'
         })
     ]
@@ -33,7 +54,13 @@ if (configs.isInDev) {
     logger.add(
         new transports.Console({
             level: 'debug',
-            format: format.combine(timestamp(), format.colorize(), simple())
+            format: format.combine(
+                timestamp({
+                    format: timezonedTime
+                }),
+                format.colorize(),
+                simple()
+            )
         })
     )
 }
