@@ -8,8 +8,8 @@ const logger = require('../logger')
 const userMenuScene = new Scene('user-menu-scene')
 
 const mainMenuButtons = Markup.keyboard([
-    [__('user-menu.eps-list-btn')],
-    [__('user-menu.last-ep-btn'), __('user-menu.badge-btn')]
+    [__('user-menu.eps-list-btn'), __('user-menu.last-ep-btn')],
+    [__('start.about-btn'), __('user-menu.badge-btn')]
 ])
     .resize()
     .extra({ parse_mode: 'Markdown' })

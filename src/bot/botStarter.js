@@ -55,6 +55,9 @@ function initBot(bot) {
     bot.hears(__('start.ep0-btn'), sendEp0)
     bot.command('teaser', sendTeaser)
 
+    bot.hears(__('start.about-btn'), ({ reply }) =>
+        reply(__('start.about'), { parse_mode: 'Markdown' })
+    )
     bot.command('about', ({ reply }) =>
         reply(__('start.about'), { parse_mode: 'Markdown' })
     )
