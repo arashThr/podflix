@@ -29,10 +29,9 @@ userMenuScene.hears(__('user-menu.eps-list-btn'), async ctx => {
         .reduce((prev, cur) => prev + `/${cur.epKey}: ${cur.fileName}\n\n`, '')
         .trim()
     ctx.reply(
-        __('user-menu.episodes-list', list),
-        Markup.inlineKeyboard([
-            Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
-        ]).extra({ parse_mode: 'HTML' })
+        __('user-menu.episodes-list', list), {
+            parse_mode: 'HTML'
+        }
     )
 })
 
@@ -102,10 +101,7 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
 
 function sendEpisodeFile(ctx, fileInfo) {
     ctx.replyWithDocument(fileInfo.fileId, {
-        caption: fileInfo.caption,
-        reply_markup: Markup.inlineKeyboard([
-            Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
-        ])
+        caption: fileInfo.caption
     })
 }
 
