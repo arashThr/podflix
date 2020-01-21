@@ -21,10 +21,8 @@ const listenToPayments = require('../payment/paymentListener')
 
 const menuKeys = Markup.keyboard([
     [__('start.teaser-btn'), __('start.ep0-btn')],
-    [__('start.buy-btn')],
-    [__('start.about-btn'), __('start.creators-btn')]
+    [__('start.buy-btn')]
 ])
-    .oneTime()
     .resize()
     .extra({ parse_mode: 'Markdown' })
 
@@ -48,6 +46,7 @@ function initBot(bot) {
         })
     })
     bot.start(botStart)
+    bot.help(ctx => ctx.reply(__('start.help'), { parse_mode: 'Markdown' }))
 
     bot.command('login', enter('login'))
     bot.hears(__('start.buy-btn'), enter('payment-wizard'))
@@ -56,10 +55,10 @@ function initBot(bot) {
     bot.hears(__('start.ep0-btn'), sendEp0)
     bot.command('teaser', sendTeaser)
 
-    bot.hears(__('start.about-btn'), ({ reply }) =>
+    bot.command('about', ({ reply }) =>
         reply(__('start.about'), { parse_mode: 'Markdown' })
     )
-    bot.hears(__('start.creators-btn'), ({ reply }) =>
+    bot.command('creators', ({ reply }) =>
         reply(__('start.creators'), { parse_mode: 'Markdown' })
     )
 

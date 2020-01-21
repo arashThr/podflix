@@ -9,10 +9,8 @@ const userMenuScene = new Scene('user-menu-scene')
 
 const mainMenuButtons = Markup.keyboard([
     [__('user-menu.eps-list-btn')],
-    [__('user-menu.last-ep-btn'), __('user-menu.badge-btn')],
-    [__('start.about-btn'), __('start.creators-btn')]
+    [__('user-menu.last-ep-btn'), __('user-menu.badge-btn')]
 ])
-    .oneTime()
     .resize()
     .extra({ parse_mode: 'Markdown' })
 
