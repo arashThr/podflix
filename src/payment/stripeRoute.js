@@ -65,6 +65,7 @@ router.get('/canceled', async (req, res) => {
 router.post(webhookPath, async (req, res) => {
     let data
     let eventType
+    logger.debug('Webhook post called on ' + webhookPath, { url: req.url })
 
     if (configs.stripe.webhookSecret) {
         let event

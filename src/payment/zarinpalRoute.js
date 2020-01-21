@@ -66,12 +66,12 @@ async function verifyPayment(clientRefId, authority) {
         )
         const result = (await resp.json()) || {}
         if (result.Status === 100) {
-            logger.info('Transation success. RefID:', { refId: result.RefID, authority })
+            logger.debug('Zainpal transation verified', { result, authority, clientRefId })
             return result.RefID
         }
-        logger.verbose('zarinpal Transction canceled', { result })
+        logger.warn('Zarinpal transction was not successful', { clientRefId, authority, result })
     } catch (err) {
-        logger.error('Error in zarinpal payment verfication', { payment, err })
+        logger.error('Error in zarinpal payment verfication', { payment, clientRefId, authority, err })
     }
 }
 
@@ -80,6 +80,7 @@ const router = express.Router()
 router.get(`${returnPath}/:clientRefId`, async (req, res) => {
     const clientRefId = req.params.clientRefId
     const Authority = req.query.Authority
+    logger.debug('Zain route called', { url: req.url, clientRefId, Authority })
 
     if (!ObjectId.isValid(clientRefId)) {
         logger.error('Object id is not valid', { clientRefId, url: req.url })
@@ -90,6 +91,7 @@ router.get(`${returnPath}/:clientRefId`, async (req, res) => {
         new ObjectId(clientRefId),
         Authority
     )
+    logger.debug('Zarin verification code obtained', { verificationId, clientRefId, Authority })
     if (verificationId) {
         res.render('stripe-success', {
             session: { clientRefId, refId: Authority },

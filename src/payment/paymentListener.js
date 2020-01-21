@@ -16,7 +16,7 @@ function listenToPayments(bot) {
         // Todo: get ref id of payment
         const { clientRefId, successful, extra } = JSON.parse(message)
         logger.verbose(
-            `New message for ${channel}, clientRefId(payId): ${clientRefId}, successful: ${successful}`
+            `Payment listener result: ${successful}`, { clientRefId, extra }
         )
 
         if (!ObjectId.isValid(clientRefId)) {
@@ -33,11 +33,11 @@ function listenToPayments(bot) {
         const tgUser = payment.tgUser
 
         if (!successful) {
-            logger.verbose('Payment canceled on payId ', { payId, ...tgUser })
+            logger.info('Payment canceled on payId ', { payId, ...tgUser, extra })
             bot.telegram.sendMessage(tgUser.chatId, __('pay.canceled'))
             return
         }
-        logger.verbose('Payment verifed for payId ', { payId, ...tgUser })
+        logger.debug('Payment listener received verifed payment', { payId, ...tgUser, extra })
 
         try {
             await savePaymentDiscountFor(tgUser.chatId, payId)
@@ -53,6 +53,7 @@ function listenToPayments(bot) {
             )
 
             await PayedUserModel.create({ paymentId: payId, ...tgUser.toObject() })
+            logger.info('New user from Iran', { payId, ...tgUser, extra })
             bot.telegram.sendMessage(tgUser.chatId, __('pay.success'), {
                 parse_mode: 'Markdown'
             })
