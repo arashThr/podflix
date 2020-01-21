@@ -2,7 +2,7 @@ const Scene = require('telegraf/scenes/base')
 const Markup = require('telegraf/markup')
 const logger = require('../logger')
 const FileModel = require('../models/fileModel')
-const { PayedUserModel } = require('../models/userModel')
+const { UserModel } = require('../models/userModel')
 const { redisClient } = require('../db')
 const Commons = require('../common')
 
@@ -197,7 +197,7 @@ async function broadcastNewFile(ctx, fileInfo) {
         }, 100) // Send message to ten users in each second
     }
 
-    const usersChatIds = await PayedUserModel.find({}, { chatId: 1 })
+    const usersChatIds = await UserModel.find({}, { chatId: 1 })
     sendFile(usersChatIds.map(u => u.chatId)
         .filter(c => c !== ctx.from.id))
 }
@@ -224,7 +224,7 @@ async function broadcastMessage(ctx, message) {
     }
 
     const myChatId = ctx.from.id
-    const usersChatIds = await PayedUserModel.find({}, { chatId: 1 })
+    const usersChatIds = await UserModel.find({}, { chatId: 1 })
     ctx.reply(`Sending message to ${usersChatIds.length - 1} users, please wait ...`)
     sendFile(usersChatIds.map(u => u.chatId)
         .filter(c => c !== myChatId))
