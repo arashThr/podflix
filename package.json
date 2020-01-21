@@ -20,7 +20,8 @@
     "redis": "^2.8.0",
     "stripe": "^7.13.0",
     "telegraf": "^3.32.0",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.1"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",

@@ -1,23 +1,28 @@
 const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, prettyPrint, simple } = format
+require('winston-daily-rotate-file')
 const configs = require('./configs')
 
-const logsDir = 'logs'
+const logsDir = 'logs/'
 
 const logger = createLogger({
     transports: [
         new transports.File({
-            filename: logsDir + '/info.log',
+            filename: logsDir + 'info.log',
             format: combine(timestamp(), prettyPrint()),
             level: 'info'
         }),
         new transports.File({
-            filename: logsDir + '/errors.log',
+            filename: logsDir + 'errors.log',
             format: combine(timestamp(), prettyPrint()),
             level: 'error'
         }),
-        new transports.File({
-            filename: logsDir + '/all.log',
+        new transports.DailyRotateFile({
+            filename: logsDir + 'debug/%DATE%.log',
+            datePattern: 'YYYY-MM-DD-HH',
+            zippedArchive: true,
+            maxSize: '20m',
+            maxFiles: '14d',
             format: combine(timestamp(), format.json()),
             level: 'debug'
         })
@@ -28,11 +33,7 @@ if (configs.isInDev) {
     logger.add(
         new transports.Console({
             level: 'debug',
-            format: format.combine(
-                timestamp(),
-                format.colorize(),
-                simple()
-            )
+            format: format.combine(timestamp(), format.colorize(), simple())
         })
     )
 }
