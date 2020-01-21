@@ -21,7 +21,7 @@ const listenToPayments = require('../payment/paymentListener')
 
 const menuKeys = Markup.keyboard([
     [__('start.teaser-btn'), __('start.ep0-btn')],
-    [__('start.buy-btn')]
+    [__('start.buy-btn'), __('start.about-btn')]
 ])
     .resize()
     .extra({ parse_mode: 'Markdown' })
