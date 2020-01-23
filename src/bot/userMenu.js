@@ -100,8 +100,14 @@ userMenuScene.hears(Commons.epNameRegex, async ctx => {
 })
 
 function sendEpisodeFile(ctx, fileInfo) {
-    ctx.replyWithDocument(fileInfo.fileId, {
-        caption: fileInfo.caption
+    // I saw no difference between replyWithDocument and replyWithAudio
+    // But I rather to stick to more restrcited version
+    // Also since we're forwarding files from Telegram servers
+    // 50 MB limitation on files does not affecting us
+    // (Bot API has its own limit on uploading files)
+    ctx.replyWithAudio(fileInfo.fileId, {
+        caption: fileInfo.caption,
+        parse_mode: 'Markdown'
     })
 }
 
