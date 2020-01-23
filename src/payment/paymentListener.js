@@ -53,7 +53,7 @@ function listenToPayments(bot) {
             )
 
             await PayedUserModel.create({ paymentId: payId, ...tgUser.toObject() })
-            logger.info('New user from Iran', { payId, ...tgUser, extra })
+            logger.info('New user subscribed successfully', { payId, ...tgUser, extra })
             bot.telegram.sendMessage(tgUser.chatId, __('pay.success'), {
                 parse_mode: 'Markdown'
             })
