@@ -171,18 +171,22 @@ dashboardScene.on('message', async ctx => {
 // More info: https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this
 async function broadcastNewFile(ctx, fileInfo) {
     // Todo: Projection is not working
-    logger.info('Broadcasting file', { fileInfo })
+    logger.info('Broadcasting file', { fileInfo, admin: ctx.from })
     function sendFile(chatIds, i = 0) {
         setTimeout(async () => {
-            if (i >= chatIds.length)
+            if (i >= chatIds.length) {
+                logger.info('Sending file is done', { finalCounterValue: i })
+                ctx.reply('Message sent to all users, DONE!')
                 return
+            }
             const chatId = chatIds[i]
-            logger.debug('Broadcasting file to ' + chatId)
+            logger.debug('Broadcasting file to user', { chatId })
             try {
                 await ctx.telegram.sendDocument(chatId,
                     fileInfo.fileId,
                     {
                         caption: __('user-menu.new-ep') + '\n' + fileInfo.caption,
+                        parse_mode: 'Markdown',
                         reply_markup: Markup.inlineKeyboard([
                             Markup.callbackButton(__('user-menu.go-home-btn'), 'user-menu')
                         ])
@@ -198,22 +202,24 @@ async function broadcastNewFile(ctx, fileInfo) {
     }
 
     const usersChatIds = await UserModel.find({}, { chatId: 1 })
-    sendFile(usersChatIds.map(u => u.chatId)
-        .filter(c => c !== ctx.from.id))
+    logger.info(`Sending file to ${usersChatIds.length} users`)
+    ctx.reply(`Sending file to ${usersChatIds.length} users, please wait ...`)
+    sendFile(usersChatIds.map(u => u.chatId))
 }
 
 async function broadcastMessage(ctx, message) {
-    logger.info('Broadcasting message', { message })
+    logger.info('Broadcasting message', { message, admin: ctx.from })
     function sendFile(chatIds, i = 0) {
         setTimeout(async () => {
             if (i >= chatIds.length) {
+                logger.info('Sending file is done', { finalCounterValue: i })
                 ctx.reply('Message sent to all users, DONE!')
                 return
             }
             const chatId = chatIds[i]
-            logger.debug('Broadcasting message to ' + chatId)
+            logger.debug('Broadcasting message to user', { chatId })
             try {
-                await ctx.telegram.sendMessage(chatId, message)
+                await ctx.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' })
             } catch (err) {
                 logger.error('User has blocked to bot. Can not broadcast the message',
                     { chatId, message }
@@ -223,11 +229,10 @@ async function broadcastMessage(ctx, message) {
         }, 100) // Send message to ten users in each second
     }
 
-    const myChatId = ctx.from.id
     const usersChatIds = await UserModel.find({}, { chatId: 1 })
-    ctx.reply(`Sending message to ${usersChatIds.length - 1} users, please wait ...`)
-    sendFile(usersChatIds.map(u => u.chatId)
-        .filter(c => c !== myChatId))
+    logger.info(`Sending message to ${usersChatIds.length} users`)
+    ctx.reply(`Sending message to ${usersChatIds.length} users, please wait ...`)
+    sendFile(usersChatIds.map(u => u.chatId))
 }
 
 module.exports = dashboardScene
