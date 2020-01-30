@@ -48,11 +48,13 @@ async function createZarinpalPayment(tgUser) {
     const amount = await getToomanAmount(tgUser.chatId)
     const payment = await irrPaymentModel.create({ amount, tgUser })
 
+    const paymentId = payment._id.toString()
+    logger.verbose('Requesting Zarinpal link', { tgUser, paymentId })
     const link = await getZarinpalPaymentLink({
         amount,
-        clientRefId: payment._id.toString()
+        clientRefId: paymentId
     })
-    logger.verbose('Zarinpal payment link: ' + link)
+    logger.verbose('Zarinpal payment link created', { link, tgUser, paymentId })
     return link
 }
 

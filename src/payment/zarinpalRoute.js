@@ -35,15 +35,15 @@ async function getZarinpalPaymentLink({ amount, clientRefId }) {
         if (result.Status === 100) {
             const link =
                 'https://www.zarinpal.com/pg/StartPay/' + result.Authority
-            logger.verbose('Zain payment link created', { link })
             return link
         } else {
             logger.warn('Creating zarinpal payment link failed', {
-                err: JSON.stringify(result)
+                err: JSON.stringify(result),
+                clientRefId
             })
         }
     } catch (err) {
-        logger.error('Error in getting zarinpal payment link', err)
+        logger.error('Error in getting zarinpal payment link', { err, clientRefId })
     }
 }
 
@@ -84,10 +84,10 @@ const router = express.Router()
 router.get(`${returnPath}/:clientRefId`, async (req, res) => {
     const clientRefId = req.params.clientRefId
     const Authority = req.query.Authority
-    logger.debug('Zain route called', { url: req.url, clientRefId, Authority })
+    logger.debug('Zarinpal route called', { url: req.url, clientRefId, Authority })
 
     if (!ObjectId.isValid(clientRefId)) {
-        logger.error('Object id is not valid', { clientRefId, url: req.url })
+        logger.error('Zarinpal route, object id is not valid', { clientRefId, url: req.url })
         res.sendStatus(404)
         return
     }
