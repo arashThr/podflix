@@ -212,7 +212,7 @@ async function broadcastMessage(ctx, message) {
     function sendFile(chatIds, i = 0) {
         setTimeout(async () => {
             if (i >= chatIds.length) {
-                logger.info('Sending file is done', { finalCounterValue: i })
+                logger.info('Sending message is done', { finalCounterValue: i })
                 ctx.reply('Message sent to all users, DONE!')
                 return
             }
