@@ -49,6 +49,10 @@ async function getZarinpalPaymentLink({ amount, clientRefId }) {
 
 async function verifyPayment(clientRefId, authority) {
     const payment = await irrPaymentModel.findOne(clientRefId)
+    if (!payment) {
+        logger.warn('No payment found for this client', { clientRefId, authority })
+        return
+    }
     const amount = payment.amount
     const verifyBody = {
         MerchantID: merchantId,
