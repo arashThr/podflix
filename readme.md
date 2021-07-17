@@ -1,6 +1,6 @@
 # Atomic Wars Series Podcast
 
-![Atomic wars series cover](assets/atomic-cover.jpg)
+<center><a href="https://atomicwarseries.com/"><img width="200" alt="Atomic wars series cover" src="assets/atomic-cover.jpg"></a></center>
 
 Atomic war series is a __special edition of [StringCast podcast](https://stringcast.ir) in collaboration with [Radio Daal](https://radioDaal.ir)__.
 
